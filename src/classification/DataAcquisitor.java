@@ -54,7 +54,7 @@ public class DataAcquisitor
     	
     	try
     	{
-    		dataFileReader = new BufferedReader(new FileReader(dataFileName));
+    		dataFileReader = new BufferedReader(new FileReader("/home/michal/workspace/Classification/src/classification/" + dataFileName));
     		
         	if (!classes.isEmpty())
         		classes.removeAll(classes);
@@ -100,38 +100,46 @@ public class DataAcquisitor
 		
     	for (int i = 0; i < chunks; i++)
     	{
-    		if (!tempListClasses.isEmpty())
-    			tempListClasses = new ArrayList<>();
-    		if (!tempListExamples.isEmpty())
-    			tempListExamples = new ArrayList<>();
+			int k = 0;		
+    		dividedData.add(new ArrayList<>());
     		
     		for (Iterator<List<String[]>> iterator = classes.iterator(); iterator.hasNext();) 
     		{
 				List <String[]> iterClass = iterator.next();
 				dividedClassSize = iterClass.size()/chunks;
-				tempListExamples = iterClass.subList(dividedClassSize*i, dividedClassSize*(i+1));
-				tempListClasses.add(tempListExamples);
+				dividedData.get(i).add(new ArrayList<>());
+								
+				for(int j = dividedClassSize*i; j < dividedClassSize*(i+1); j++)
+				{
+					dividedData.get(i).get(k).add(iterClass.get(j));
+				}
+				
+				k++;
 			}
-    		
-    		dividedData.add(tempListClasses);
     	}
+    	
+    	int j = 0;
+    	String[] tempExample = new String[classes.get(0).get(0).length];
     	
     	for (Iterator<List<String[]>> iterator = classes.iterator(); iterator.hasNext();)
     	{
-    		List<String[]> tempClasses = iterator.next();
-    		int j = 0;
-    		if(tempClasses.size()%chunks!=0)
+    		List<String[]> tempClasses = iterator.next();	
+    		int tempClassesSize = tempClasses.size();
+    		
+    		if(tempClassesSize%chunks!=0)
     		{
-    			for(int i = 0; i < tempClasses.size()%chunks; i++)
+    			for(int i = 0; i < tempClassesSize%chunks; i++)
     			{
-    				dividedData.get(i).get(j).add(tempClasses.get(tempClasses.size()-1-i));
+    				tempExample = tempClasses.get(tempClassesSize-1-i);
+    				dividedData.get(i).get(j).add(tempExample);
+    				System.out.println("Added example to data set " + i + " to class " + j);
     			}
     		}
     		j++;
     	}
     	
     	System.out.println("chunks in divedData: " + dividedData.size());
-    	int j = 0;
+    	j = 0;
     	for (Iterator<List<List<String[]>>> iterator = dividedData.iterator(); iterator.hasNext();)
     	{
     		List <List<String[]>> tempClasses = iterator.next();
@@ -159,13 +167,17 @@ public class DataAcquisitor
      
     private void getInfoFromUser()
     {
-    	dataFileName = getStringFromUser("path to data file");
+    	/*dataFileName = getStringFromUser("path to data file");
     	
     	while(attributesQuantity == 0)
     		attributesQuantity = getValueFromUser("quantity of attributes");
     	
     	while(classesQuantity == 0)
-    		classesQuantity = getValueFromUser("quantity of classes");
+    		classesQuantity = getValueFromUser("quantity of classes");*/
+    	dataFileName = "car.data.txt";
+    	attributesQuantity = 6;
+    	classesQuantity = 4;
+    	
     }
     
     public int getValueFromUser(String valueName)
