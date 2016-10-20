@@ -164,6 +164,26 @@ public class DataAcquisitor
     {
     	return this.classes;
     }
+    
+    public List<List<String[]>> getTrainingData(int chunkFrom, int chunkTo)
+    {
+    	List<List<String[]>> trainingData = new ArrayList<>();
+    	List<List<String[]>> devidedDataSet;
+    	List<String[]> dataClass;
+    	int j;
+    	
+    	for (int i = chunkFrom; i < chunkTo; i++)
+    	{
+    		j = 0;
+    		for(Iterator<List<String[]>> iterator = dividedData.get(i).iterator(); iterator.hasNext();)
+    		{
+    			trainingData.add(j, iterator.next());
+    			j++;
+    		}	
+    	}	
+    	
+    	return trainingData;
+    }
      
     private void getInfoFromUser()
     {
