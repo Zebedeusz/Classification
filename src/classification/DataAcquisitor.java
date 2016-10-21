@@ -33,13 +33,14 @@ public class DataAcquisitor
     			this.dataFileName = getStringFromUser("path to data file");
     		}
 			
+    		/*
 			int i = 0;
 			for (List al : classes)
 			{
 				System.out.println("Size of class" + i + ": " + al.size());
 				i++;
 			}
-			
+			*/
 			System.out.println("Data aquisition finished successfuly.");
 		} 
     	catch (IOException e) 
@@ -54,7 +55,7 @@ public class DataAcquisitor
     	
     	try
     	{
-    		dataFileReader = new BufferedReader(new FileReader("/home/michal/workspace/Classification/src/classification/" + dataFileName));
+    		dataFileReader = new BufferedReader(new FileReader("C:/Users/Micha³/workspace/Classification/src/classification/" + dataFileName));
     		
         	if (!classes.isEmpty())
         		classes.removeAll(classes);
@@ -97,7 +98,6 @@ public class DataAcquisitor
 		List <String[]> tempListExamples = new ArrayList<>();
 		int dividedClassSize;
 		
-		
     	for (int i = 0; i < chunks; i++)
     	{
 			int k = 0;		
@@ -132,12 +132,12 @@ public class DataAcquisitor
     			{
     				tempExample = tempClasses.get(tempClassesSize-1-i);
     				dividedData.get(i).get(j).add(tempExample);
-    				System.out.println("Added example to data set " + i + " to class " + j);
     			}
     		}
     		j++;
     	}
     	
+    	/*
     	System.out.println("chunks in divedData: " + dividedData.size());
     	j = 0;
     	for (Iterator<List<List<String[]>>> iterator = dividedData.iterator(); iterator.hasNext();)
@@ -151,7 +151,8 @@ public class DataAcquisitor
     		}
     		j++;
     		
-    	}    	
+    	} 
+    	*/   	
     }
     
     
@@ -168,16 +169,25 @@ public class DataAcquisitor
     public List<List<String[]>> getTrainingData(int chunkFrom, int chunkTo)
     {
     	List<List<String[]>> trainingData = new ArrayList<>();
-    	List<List<String[]>> devidedDataSet;
     	List<String[]> dataClass;
     	int j;
+    	
+    	for (int i = 0; i < classesQuantity; i++)
+    	{
+    		trainingData.add(new ArrayList<>());
+    	}
     	
     	for (int i = chunkFrom; i < chunkTo; i++)
     	{
     		j = 0;
     		for(Iterator<List<String[]>> iterator = dividedData.get(i).iterator(); iterator.hasNext();)
     		{
-    			trainingData.add(j, iterator.next());
+    			dataClass = iterator.next();
+    			
+    			for(int k = 0; k < dataClass.size(); k++)
+    			{
+    				trainingData.get(j).add(dataClass.get(k));
+    			}
     			j++;
     		}	
     	}	
@@ -185,6 +195,40 @@ public class DataAcquisitor
     	return trainingData;
     }
      
+    public List<List<String[]>> getTestData(int chunkFrom, int chunkTo)
+    {
+    	List<List<String[]>> testData = new ArrayList<>();
+    	List<String[]> dataClass;
+    	String[] example;
+    	
+    	for (int i = 0; i < classesQuantity; i++)
+    	{
+    		testData.add(new ArrayList<>());
+    	}
+    	
+    	int j = 0;
+    	for (int i = chunkFrom; i < chunkTo; i++)
+    	{
+    		j = 0;
+    		for(Iterator<List<String[]>> iterator = dividedData.get(i).iterator(); iterator.hasNext();)
+    		{
+    			dataClass = iterator.next();
+    			
+    			for(int k = 0; k < dataClass.size(); k++)
+    			{
+    				example = dataClass.get(k);
+    				example[attributesQuantity] = "";
+    				testData.get(j).add(example);
+    			}
+    			j++;
+    		}	
+    	}	
+    	
+    	
+    	
+    	return testData;
+    }
+    
     private void getInfoFromUser()
     {
     	/*dataFileName = getStringFromUser("path to data file");
