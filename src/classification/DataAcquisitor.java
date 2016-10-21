@@ -1,8 +1,10 @@
 package classification;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
@@ -33,14 +35,14 @@ public class DataAcquisitor
     			this.dataFileName = getStringFromUser("path to data file");
     		}
 			
-    		/*
+    		
 			int i = 0;
 			for (List al : classes)
 			{
 				System.out.println("Size of class" + i + ": " + al.size());
 				i++;
 			}
-			*/
+			
 			System.out.println("Data aquisition finished successfuly.");
 		} 
     	catch (IOException e) 
@@ -55,7 +57,7 @@ public class DataAcquisitor
     	
     	try
     	{
-    		dataFileReader = new BufferedReader(new FileReader("C:/Users/Micha³/workspace/Classification/src/classification/" + dataFileName));
+    		dataFileReader = new BufferedReader(new FileReader("/home/michal/workspace/Classification/src/classification/Datasets/Wine/" + dataFileName));
     		
         	if (!classes.isEmpty())
         		classes.removeAll(classes);
@@ -156,8 +158,75 @@ public class DataAcquisitor
     }
     
     
+    public void discretizeAttributeByWidth(int attrNumber, int groups)
+    {
+		double max = Double.parseDouble(classes.get(0).get(0)[attrNumber]);
+		double min = max;
+		
+    	for (Iterator<List<String[]>> iteratorClasses = classes.iterator(); iteratorClasses.hasNext();)
+    	{	
+    		for (Iterator<String[]> iteratorExamples = iteratorClasses.next().iterator(); iteratorExamples.hasNext();)
+    		{
+    			//finding maximum value of attribute
+    			double tempValue = Double.parseDouble(iteratorExamples.next()[attrNumber]);
+    			if(max < tempValue)
+    				max = tempValue;
+    			
+    			//finding minimum value of attribute
+    			else if(min > tempValue)
+    				min = tempValue;
+    		}
+    	}
+    	
+    	int i = 0;
+    	for (Iterator<List<String[]>> iteratorClasses = classes.iterator(); iteratorClasses.hasNext();)
+    	{	
+    		int j = 0;
+    		for (Iterator<String[]> iteratorExamples = iteratorClasses.next().iterator(); iteratorExamples.hasNext();)
+    		{
+    			double attrValue = Double.parseDouble(iteratorExamples.next()[attrNumber]);
+    			
+    			for(int k = 0; k < groups; k++)
+    			{
+    				if(attrValue >= (min+((max-min)/groups)*k) && attrValue <= (min+(((max-min)/groups)*(k+1))))
+        				classes.get(i).get(j)[attrNumber] = String.valueOf((min+((max-min)/groups)*k)) + "-" +  String.valueOf(min+(((max-min)/groups)*(k+1)));
+    			}	
+    			j++;
+    		}
+    		i++;
+    	}
+    }
     
-    
+    public void writeDataToFile()
+    {
+    	String writeFile = "/home/michal/workspace/Classification/src/classification/Datasets/Wine/wineDisc.data.txt";
+
+		BufferedWriter dataFileWriter;
+		try 
+		{
+			dataFileWriter = new BufferedWriter(new FileWriter(writeFile));
+		for (Iterator<List<String[]>> iteratorClasses = classes.iterator(); iteratorClasses.hasNext();)
+    	{	
+    		for (Iterator<String[]> iteratorExamples = iteratorClasses.next().iterator(); iteratorExamples.hasNext();)
+    		{
+    			for(String attr : iteratorExamples.next())
+    			{
+    				dataFileWriter.write(attr + ",");
+    			}
+    			dataFileWriter.write("\n");
+    		}
+    	}
+		
+		dataFileWriter.close();
+		System.out.println("Writing data to file finished successfuly.");
+		}
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
+		
+		
+    }
     
     
     
@@ -229,6 +298,10 @@ public class DataAcquisitor
     	return testData;
     }
     
+    
+    
+    
+    
     private void getInfoFromUser()
     {
     	/*dataFileName = getStringFromUser("path to data file");
@@ -238,9 +311,9 @@ public class DataAcquisitor
     	
     	while(classesQuantity == 0)
     		classesQuantity = getValueFromUser("quantity of classes");*/
-    	dataFileName = "car.data.txt";
-    	attributesQuantity = 6;
-    	classesQuantity = 4;
+    	dataFileName = "wine2.data.txt";
+    	attributesQuantity = 13;
+    	classesQuantity = 3;
     	
     }
     
