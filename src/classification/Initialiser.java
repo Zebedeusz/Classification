@@ -1,6 +1,5 @@
 package classification;
 
-import java.util.List;
 
 public class Initialiser {
 
@@ -9,7 +8,7 @@ public class Initialiser {
         DataAcquisitor acq = new DataAcquisitor();
         acq.loadData();
         acq.discretizeAttributeByFrequency(0, 10);
-        //acq.writeDataToFile();
+        acq.writeDataToFile();
         /*
         acq.divideData(10);
         

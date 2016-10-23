@@ -14,21 +14,33 @@ import java.util.Scanner;
 
 public class DataAcquisitor 
 {
-	private int attributesQuantity = 0;
-	private int classesQuantity = 0;
+	private int attributesQuantity;
+	private int classesQuantity;
 	private String dataFileName;
 	private String dataFileLocation = "/home/michal/workspace/Classification/src/classification/Datasets/Wine/";
+	String[] classValues;
 	
-    private String[] example = new String[attributesQuantity+1];
-    private List <List<String[]>> classes = new ArrayList<>();
-    private List <List<List<String[]>>> dividedData = new ArrayList<>();
+    private String[] example;
+    private List <List<String[]>> classes;
+    private List <List<List<String[]>>> dividedData;
     
-    private Scanner sc = new Scanner(System.in);
+    private Scanner sc;
+    
+    
+    private void initialise()
+    {
+    	this.classValues = new String[classesQuantity];
+    	this.example = new String[attributesQuantity+1];
+    	this.dividedData = new ArrayList<>();
+    	this.classes = new ArrayList<>();
+    	this.sc = new Scanner(System.in);
+    }
     
     public void loadData()
     {
     	getInfoFromUser();
-		
+    	initialise();
+    	
     	try 
     	{
     		while (!getDataFromFile(dataFileName))
@@ -61,9 +73,7 @@ public class DataAcquisitor
     		dataFileReader = new BufferedReader(new FileReader(dataFileLocation + dataFileName));
     		
         	if (!classes.isEmpty())
-        		classes.removeAll(classes);
-        	
-        	String[] classValues = new String[classesQuantity];
+        		classes.clear();
         	
         	for (int i = 0; i < classesQuantity; i++)
         	{
@@ -208,6 +218,7 @@ public class DataAcquisitor
 
 			dataFileWriter = new BufferedWriter(new FileWriter(dataFileLocation + dataFileName + "_sorted"));
 			
+			//reading data from initial file
 	    	while (dataFileReader.ready())
 	    	{
 	    		examples.add(dataFileReader.readLine().split(","));
@@ -230,31 +241,37 @@ public class DataAcquisitor
 	
 	    	}
 	    	
+	    	//discretisation 
 	    	int binSize = examples.size()/bins;
 	    	int leftExamples = examples.size()%bins;
 	    	int j = 0;
 	    	int compValue = 0;
 	    	int cnt = 0;
-				for(int i = 0; i < bins; i++)
-				{
-					for(; j < binSize*(i+1) + compValue; j++)
-					{
-						examples.get(j)[attrNumber] = "BIN" + String.valueOf(i+1);
-					}
-					
-					if(leftExamples > 0)
-					{
-						examples.get(binSize*(i+1))[attrNumber] = "BIN" + String.valueOf(i+1);
-						j = ((binSize*(i+1))+1);
-						compValue++;
-						leftExamples--;
-						cnt = 1;
-					}
-					
-					System.out.println("Size of bin" + i + ": " + String.valueOf(binSize+ cnt));
-					cnt = 0;
-				}
+	    	String newAttrValue;
 	    	
+			for(int i = 0; i < bins; i++)
+			{
+				if(leftExamples > 0)
+					newAttrValue = examples.get(j)[attrNumber] + "-" + examples.get(binSize*(i+1)+compValue)[attrNumber];
+				else
+					newAttrValue = examples.get(j)[attrNumber] + "-" + examples.get(binSize*(i+1)+compValue-1)[attrNumber];
+				
+				for(; j < binSize*(i+1) + compValue; j++)
+				{
+					//examples.get(j)[attrNumber] = "BIN" + String.valueOf(i+1);
+					examples.get(j)[attrNumber] = newAttrValue;
+				}
+				
+				if(leftExamples > 0)
+				{
+					//examples.get(binSize*(i+1))[attrNumber] = "BIN" + String.valueOf(i+1);
+					examples.get(binSize*(i+1)+compValue)[attrNumber] = newAttrValue;
+					compValue++;
+					j++;
+					leftExamples--;
+				}
+			}
+    	
 	    	
 	    	for (Iterator<String[]> iterator = examples.iterator(); iterator.hasNext();) 
 	    	{
@@ -273,6 +290,44 @@ public class DataAcquisitor
 			}
 	    	
 	    	dataFileWriter.close();
+	    	
+			//writing discretised data to classes variable
+      		classes.clear();
+      		
+      		dataFileReader = new BufferedReader(new FileReader(dataFileLocation + dataFileName + "_sorted"));
+      		
+        	for (int i = 0; i < classesQuantity; i++)
+        	{
+        		classes.add(new ArrayList<String[]>());
+        	}
+        	
+        	while (dataFileReader.ready())
+        	{
+        		example = dataFileReader.readLine().split(",");
+        		
+        		for (int i = 0; i < classesQuantity; i++)
+        		{
+        			//System.out.println("class Value:" + example[attributesQuantity]);
+        			//System.out.println(classValues[i]);
+        			if (classValues[i].equals(example[attributesQuantity]))
+        			{
+        				classes.get(i).add(example);
+        				break;
+        			}
+        		}
+        	}
+        	dataFileReader.close();
+        	
+			int cntx = 0;
+			for (List al : classes)
+			{
+				System.out.println("Size of class" + cntx + ": " + al.size());
+				cntx++;
+			}
+        	
+        	
+	    	
+	    	
     	
 		} 
 		catch (IOException e) 
@@ -284,7 +339,7 @@ public class DataAcquisitor
     
     public void writeDataToFile()
     {
-    	String writeFile = "/home/michal/workspace/Classification/src/classification/Datasets/Wine/wineDisc.data.txt";
+    	String writeFile = "/home/michal/workspace/Classification/src/classification/Datasets/Wine/wineNew.data.txt";
 
 		BufferedWriter dataFileWriter;
 		try 
@@ -294,9 +349,14 @@ public class DataAcquisitor
     	{	
     		for (Iterator<String[]> iteratorExamples = iteratorClasses.next().iterator(); iteratorExamples.hasNext();)
     		{
+    			int i = 0;
     			for(String attr : iteratorExamples.next())
     			{
-    				dataFileWriter.write(attr + ",");
+    				dataFileWriter.write(attr);
+	    			if (i<attributesQuantity)
+	    				dataFileWriter.write(",");
+	    			
+	    			i++;
     			}
     			dataFileWriter.write("\n");
     		}
@@ -396,9 +456,9 @@ public class DataAcquisitor
     	
     	while(classesQuantity == 0)
     		classesQuantity = getValueFromUser("quantity of classes");*/
-    	dataFileName = "wine2.data.txt";
-    	attributesQuantity = 13;
-    	classesQuantity = 3;
+    	this.dataFileName = "wine2.data.txt";
+    	this.attributesQuantity = 13;
+    	this.classesQuantity = 3;
     	
     }
     
