@@ -17,12 +17,13 @@ public class DataAcquisitor
 	private int attributesQuantity = 0;
 	private int classesQuantity = 0;
 	private String dataFileName;
+	private String dataFileLocation = "/home/michal/workspace/Classification/src/classification/Datasets/Wine/";
 	
     private String[] example = new String[attributesQuantity+1];
     private List <List<String[]>> classes = new ArrayList<>();
     private List <List<List<String[]>>> dividedData = new ArrayList<>();
     
-    
+    private Scanner sc = new Scanner(System.in);
     
     public void loadData()
     {
@@ -57,7 +58,7 @@ public class DataAcquisitor
     	
     	try
     	{
-    		dataFileReader = new BufferedReader(new FileReader("/home/michal/workspace/Classification/src/classification/Datasets/Wine/" + dataFileName));
+    		dataFileReader = new BufferedReader(new FileReader(dataFileLocation + dataFileName));
     		
         	if (!classes.isEmpty())
         		classes.removeAll(classes);
@@ -74,7 +75,7 @@ public class DataAcquisitor
         	{
         		example = dataFileReader.readLine().split(",");
         		
-        		for (int i = 0; i < classValues.length; i++)
+        		for (int i = 0; i < classesQuantity; i++)
         		{
         			if (classValues[i].equals(example[attributesQuantity]))
         			{
@@ -96,8 +97,6 @@ public class DataAcquisitor
     
     public void divideData(int chunks)
     {
-		List <List<String[]>> tempListClasses = new ArrayList<>();
-		List <String[]> tempListExamples = new ArrayList<>();
 		int dividedClassSize;
 		
     	for (int i = 0; i < chunks; i++)
@@ -158,7 +157,7 @@ public class DataAcquisitor
     }
     
     
-    public void discretizeAttributeByWidth(int attrNumber, int groups)
+    public void discretizeAttributeByWidth(int attrNumber, int bins)
     {
 		double max = Double.parseDouble(classes.get(0).get(0)[attrNumber]);
 		double min = max;
@@ -186,15 +185,101 @@ public class DataAcquisitor
     		{
     			double attrValue = Double.parseDouble(iteratorExamples.next()[attrNumber]);
     			
-    			for(int k = 0; k < groups; k++)
+    			for(int k = 0; k < bins; k++)
     			{
-    				if(attrValue >= (min+((max-min)/groups)*k) && attrValue <= (min+(((max-min)/groups)*(k+1))))
-        				classes.get(i).get(j)[attrNumber] = String.valueOf((min+((max-min)/groups)*k)) + "-" +  String.valueOf(min+(((max-min)/groups)*(k+1)));
+    				if(attrValue >= (min+((max-min)/bins)*k) && attrValue <= (min+(((max-min)/bins)*(k+1))))
+        				classes.get(i).get(j)[attrNumber] = String.valueOf((min+((max-min)/bins)*k)) + "-" +  String.valueOf(min+(((max-min)/bins)*(k+1)));
     			}	
     			j++;
     		}
     		i++;
     	}
+    }
+    
+    public void discretizeAttributeByFrequency (int attrNumber, int bins)
+    {
+    	List<String[]> examples = new ArrayList<String[]>();
+    	
+    	BufferedReader dataFileReader = null;
+    	BufferedWriter dataFileWriter = null;
+		try 
+		{
+			dataFileReader = new BufferedReader(new FileReader(dataFileLocation + dataFileName));
+
+			dataFileWriter = new BufferedWriter(new FileWriter(dataFileLocation + dataFileName + "_sorted"));
+			
+	    	while (dataFileReader.ready())
+	    	{
+	    		examples.add(dataFileReader.readLine().split(","));
+	    	}
+	    	
+	    	dataFileReader.close();
+	    	
+	    	//sorting examples list
+	    	String[] tempExample;
+	    	for(int i = 1; i < examples.size()-1; i++)
+	    	{
+	    		int j = i;
+	    		while((j > 0) && (Double.parseDouble(examples.get(j-1)[attrNumber]) > Double.parseDouble(examples.get(j)[attrNumber])))
+				{
+	    			tempExample = examples.get(j-1);
+	    			examples.set(j-1,examples.get(j));
+	    			examples.set(j,tempExample);
+	    			j--;
+				}
+	
+	    	}
+	    	
+	    	int binSize = examples.size()/bins;
+	    	int leftExamples = examples.size()%bins;
+	    	int j = 0;
+	    	int compValue = 0;
+	    	int cnt = 0;
+				for(int i = 0; i < bins; i++)
+				{
+					for(; j < binSize*(i+1) + compValue; j++)
+					{
+						examples.get(j)[attrNumber] = "BIN" + String.valueOf(i+1);
+					}
+					
+					if(leftExamples > 0)
+					{
+						examples.get(binSize*(i+1))[attrNumber] = "BIN" + String.valueOf(i+1);
+						j = ((binSize*(i+1))+1);
+						compValue++;
+						leftExamples--;
+						cnt = 1;
+					}
+					
+					System.out.println("Size of bin" + i + ": " + String.valueOf(binSize+ cnt));
+					cnt = 0;
+				}
+	    	
+	    	
+	    	for (Iterator<String[]> iterator = examples.iterator(); iterator.hasNext();) 
+	    	{
+	    		int i = 0;
+	    		for(String attrValue : iterator.next())
+	    		{
+	    			dataFileWriter.write(attrValue);
+	    			
+	    			if (i<attributesQuantity)
+	    				dataFileWriter.write(",");
+	    			
+	    			i++;
+	    		}
+	    		
+	    		dataFileWriter.write("\n");
+			}
+	    	
+	    	dataFileWriter.close();
+    	
+		} 
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
+    	
     }
     
     public void writeDataToFile()
@@ -319,7 +404,7 @@ public class DataAcquisitor
     
     public int getValueFromUser(String valueName)
     {
-    	Scanner sc = new Scanner(System.in);
+
     	int value = 0;
         System.out.print("Enter " + valueName + ": ");
         
@@ -333,18 +418,16 @@ public class DataAcquisitor
         	System.out.println("Unaccepted data type inserted");
         	value = 0;
         }
-        
+    
         return value;
     }
     
     public String getStringFromUser(String valueName)
     {
-        Scanner sc = new Scanner(System.in);
-        
         System.out.print("Enter " + valueName + ": ");
         
         String value = sc.next();
-        
+
         return value;
     }
 

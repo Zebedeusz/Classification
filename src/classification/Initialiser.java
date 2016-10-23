@@ -8,8 +8,8 @@ public class Initialiser {
     {
         DataAcquisitor acq = new DataAcquisitor();
         acq.loadData();
-        acq.discretizeAttributeByWidth(0, 10);
-        acq.writeDataToFile();
+        acq.discretizeAttributeByFrequency(0, 10);
+        //acq.writeDataToFile();
         /*
         acq.divideData(10);
         
