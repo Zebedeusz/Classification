@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Iterator;
@@ -17,7 +18,7 @@ public class DataAcquisitor
 	private int attributesQuantity;
 	private int classesQuantity;
 	private String dataFileName;
-	private String dataFileLocation = "/home/michal/workspace/Classification/src/classification/Datasets/Wine/";
+	private String dataFileLocation = "/home/michal/workspace/Classification/src/classification/Datasets/Car/";
 	String[] classValues;
 	
     private String[] example;
@@ -48,14 +49,14 @@ public class DataAcquisitor
     			this.dataFileName = getStringFromUser("path to data file");
     		}
 			
-    		
+    		/*
 			int i = 0;
 			for (List al : classes)
 			{
 				System.out.println("Size of class" + i + ": " + al.size());
 				i++;
 			}
-			
+			*/
 			System.out.println("Data aquisition finished successfuly.");
 		} 
     	catch (IOException e) 
@@ -246,7 +247,6 @@ public class DataAcquisitor
 	    	int leftExamples = examples.size()%bins;
 	    	int j = 0;
 	    	int compValue = 0;
-	    	int cnt = 0;
 	    	String newAttrValue;
 	    	
 			for(int i = 0; i < bins; i++)
@@ -317,18 +317,6 @@ public class DataAcquisitor
         		}
         	}
         	dataFileReader.close();
-        	
-			int cntx = 0;
-			for (List al : classes)
-			{
-				System.out.println("Size of class" + cntx + ": " + al.size());
-				cntx++;
-			}
-        	
-        	
-	    	
-	    	
-    	
 		} 
 		catch (IOException e) 
 		{
@@ -409,16 +397,11 @@ public class DataAcquisitor
     	return trainingData;
     }
      
-    public List<List<String[]>> getTestData(int chunkFrom, int chunkTo)
+    public List<String[]> getTestData(int chunkFrom, int chunkTo)
     {
-    	List<List<String[]>> testData = new ArrayList<>();
+    	List<String[]> testData = new ArrayList<>();
     	List<String[]> dataClass;
     	String[] example;
-    	
-    	for (int i = 0; i < classesQuantity; i++)
-    	{
-    		testData.add(new ArrayList<>());
-    	}
     	
     	int j = 0;
     	for (int i = chunkFrom; i < chunkTo; i++)
@@ -431,8 +414,8 @@ public class DataAcquisitor
     			for(int k = 0; k < dataClass.size(); k++)
     			{
     				example = dataClass.get(k);
-    				example[attributesQuantity] = "";
-    				testData.get(j).add(example);
+    				//example[attributesQuantity] = "";
+    				testData.add(example);
     			}
     			j++;
     		}	
@@ -456,9 +439,9 @@ public class DataAcquisitor
     	
     	while(classesQuantity == 0)
     		classesQuantity = getValueFromUser("quantity of classes");*/
-    	this.dataFileName = "wine2.data.txt";
-    	this.attributesQuantity = 13;
-    	this.classesQuantity = 3;
+    	this.dataFileName = "car.data.txt";
+    	this.attributesQuantity = 6;
+    	this.classesQuantity = 4;
     	
     }
     

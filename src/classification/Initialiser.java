@@ -1,5 +1,6 @@
 package classification;
 
+import java.util.List;
 
 public class Initialiser {
 
@@ -7,17 +8,43 @@ public class Initialiser {
     {
         DataAcquisitor acq = new DataAcquisitor();
         acq.loadData();
-        acq.discretizeAttributeByFrequency(0, 10);
-        acq.writeDataToFile();
-        /*
+        
+        //acq.discretizeAttributeByFrequency(0, 10);
+        //acq.writeDataToFile();
+        
         acq.divideData(10);
         
         List<List<String[]>> trainingData;
-        trainingData = acq.getTrainingData(0, 5);
+        trainingData = acq.getTrainingData(0, 9);
         
-        List<List<String[]>> testData;
-        testData = acq.getTestData(5, 7);
-        */
+        List<String[]> testData;
+        testData = acq.getTestData(9, 10);
+        
+        
+        Bayes bayes = new Bayes();
+        
+        bayes.setTrainingData(trainingData);
+        bayes.classifyExamples(testData);
+        
+        List<String[]> classifiedData;
+        classifiedData = bayes.getClassifiedData();
+        
+        System.out.println("Size of classifiedData: " + classifiedData.size());
+        int cnt = 0;
+        int attrsWithUnacc= 0;
+        for(String[] attr : classifiedData)
+        {
+        	if(attr[attr.length-2].equals(attr[attr.length-1]))
+        	{
+        		cnt++;
+        	}
+        	
+        	if(attr[attr.length-1].equals("unacc"))
+        		attrsWithUnacc++;
+        }
+        	
+        System.out.println("Matching values: " + cnt);
+        System.out.println("Values with unacc: " + attrsWithUnacc); 
         /*
         
         
