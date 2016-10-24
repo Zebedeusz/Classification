@@ -18,15 +18,15 @@ public class DataAcquisitor
 	private int attributesQuantity;
 	private int classesQuantity;
 	private String dataFileName;
-	private String dataFileLocation = "/home/michal/workspace/Classification/src/classification/Datasets/Car/";
+	private String dataFileLocation = "/home/michal/workspace/Classification/src/classification/Datasets/Iris/";
 	String[] classValues;
 	
     private String[] example;
     private List <List<String[]>> classes;
     private List <List<List<String[]>>> dividedData;
+    List<List<String[]>> trainingData = new ArrayList<>();
     
     private Scanner sc;
-    
     
     private void initialise()
     {
@@ -35,6 +35,9 @@ public class DataAcquisitor
     	this.dividedData = new ArrayList<>();
     	this.classes = new ArrayList<>();
     	this.sc = new Scanner(System.in);
+    	classValues[0] = "Iris-setosa";
+    	classValues[1] = "Iris-versicolor";
+    	classValues[2] = "Iris-virginica";
     }
     
     public void loadData()
@@ -79,13 +82,13 @@ public class DataAcquisitor
         	for (int i = 0; i < classesQuantity; i++)
         	{
         		classes.add(new ArrayList<String[]>());
-        		classValues[i] = getStringFromUser("value of class" + i);
+        		//classValues[i] = getStringFromUser("value of class" + i);
         	}
         	
         	while (dataFileReader.ready())
         	{
         		example = dataFileReader.readLine().split(",");
-        		
+
         		for (int i = 0; i < classesQuantity; i++)
         		{
         			if (classValues[i].equals(example[attributesQuantity]))
@@ -368,9 +371,8 @@ public class DataAcquisitor
     	return this.classes;
     }
     
-    public List<List<String[]>> getTrainingData(int chunkFrom, int chunkTo)
+    public void appendTrainingData(int chunkFrom, int chunkTo)
     {
-    	List<List<String[]>> trainingData = new ArrayList<>();
     	List<String[]> dataClass;
     	int j;
     	
@@ -394,6 +396,10 @@ public class DataAcquisitor
     		}	
     	}	
     	
+    }
+    
+    public List<List<String[]>> getTrainingData()
+    {
     	return trainingData;
     }
      
@@ -425,11 +431,7 @@ public class DataAcquisitor
     	
     	return testData;
     }
-    
-    
-    
-    
-    
+
     private void getInfoFromUser()
     {
     	/*dataFileName = getStringFromUser("path to data file");
@@ -439,9 +441,9 @@ public class DataAcquisitor
     	
     	while(classesQuantity == 0)
     		classesQuantity = getValueFromUser("quantity of classes");*/
-    	this.dataFileName = "car.data.txt";
-    	this.attributesQuantity = 6;
-    	this.classesQuantity = 4;
+    	this.dataFileName = "iris.data.txt";
+    	this.attributesQuantity = 4;
+    	this.classesQuantity = 3;
     	
     }
     
