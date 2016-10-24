@@ -403,7 +403,7 @@ public class DataAcquisitor
     	List<String[]> dataClass;
     	String[] example;
     	
-    	int j = 0;
+    	int j;
     	for (int i = chunkFrom; i < chunkTo; i++)
     	{
     		j = 0;

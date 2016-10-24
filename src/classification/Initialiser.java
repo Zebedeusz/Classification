@@ -1,5 +1,6 @@
 package classification;
 
+import java.util.Iterator;
 import java.util.List;
 
 public class Initialiser {
@@ -12,42 +13,50 @@ public class Initialiser {
         //acq.discretizeAttributeByFrequency(0, 10);
         //acq.writeDataToFile();
         
-        acq.divideData(10);
+        acq.divideData(8);
         
         List<List<String[]>> trainingData;
-        trainingData = acq.getTrainingData(0, 9);
+        trainingData = acq.getTrainingData(1, 8);
         
         List<String[]> testData;
-        testData = acq.getTestData(9, 10);
-        
+        testData = acq.getTestData(0, 1);
         
         Bayes bayes = new Bayes();
         
         bayes.setTrainingData(trainingData);
-        bayes.classifyExamples(testData);
-        
+            
         List<String[]> classifiedData;
-        classifiedData = bayes.getClassifiedData();
+        classifiedData = bayes.classifyExamples(testData);
         
         System.out.println("Size of classifiedData: " + classifiedData.size());
+        
         int cnt = 0;
         int attrsWithUnacc= 0;
-        for(String[] attr : classifiedData)
+        for(Iterator<String[]> iterator = classifiedData.iterator(); iterator.hasNext();)
         {
+        	String[] attr = iterator.next();
         	if(attr[attr.length-2].equals(attr[attr.length-1]))
         	{
         		cnt++;
         	}
         	
-        	if(attr[attr.length-1].equals("unacc"))
+        	if(attr[attr.length-2].equals("unacc"))
         		attrsWithUnacc++;
+        	
+        	for(int i = 0; i < attr.length; i++)
+        	{
+        		System.out.print(attr[i]+",");
+        	}
+        	System.out.println();
+        	
+        	
         }
         	
         System.out.println("Matching values: " + cnt);
         System.out.println("Values with unacc: " + attrsWithUnacc); 
+        
+        
         /*
-        
-        
         System.out.println("Number of classes in trainingData:" + trainingData.size());
         
         for(int i = 0; i < trainingData.size(); i++)
