@@ -66,7 +66,7 @@ public class Bayes extends Classifier
 		return trainingData.get(maxPClass).get(0)[trainingData.get(maxPClass).get(0).length-1];
 	}
 	
-	public List<String[]>  classifyExamples(List<String[]> testData)
+	public void  classifyExamples(List<String[]> testData)
 	{
 		this.classifiedData = new ArrayList<String[]>();
 		String[] example = new String[testData.get(0).length+1];
@@ -81,7 +81,6 @@ public class Bayes extends Classifier
 			example[example.length-1] = classifyExample(tempExample);
 			this.classifiedData.add(example);
 		}
-		
-		return classifiedData;
+
 	}
 }

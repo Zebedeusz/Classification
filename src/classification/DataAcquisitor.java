@@ -15,60 +15,45 @@ import java.util.Scanner;
 
 public class DataAcquisitor 
 {
+	private final String dataFileLocation = "/home/michal/workspace/Classification/src/classification/Datasets/";
+	
+	//info about data from user
 	private int attributesQuantity;
 	private int classesQuantity;
 	private String dataFileName;
-	private String dataFileLocation = "/home/michal/workspace/Classification/src/classification/Datasets/Iris/";
 	String[] classValues;
 	
+	//variables used for data manipulation
     private String[] example;
     private List <List<String[]>> classes;
     private List <List<List<String[]>>> dividedData;
-    List<List<String[]>> trainingData = new ArrayList<>();
+    List<List<String[]>> trainingData;
+    List<String[]> testData;
     
-    private Scanner sc;
+    private DataAcquisitor(){};
     
-    private void initialise()
+    private static final DataAcquisitor instance = new DataAcquisitor();
+    
+    public static DataAcquisitor getInstance()
     {
-    	this.classValues = new String[classesQuantity];
+    	return instance;
+    }
+    
+    public void initialise(String dataFileName, int classesQuantity, int attributesQuantity, String[] classValues) 
+    {
+    	this.dataFileName = dataFileName;
+    	this.classesQuantity = classesQuantity;
+    	this.attributesQuantity = attributesQuantity;
+    	this.classValues = classValues;
+    	
+        this.trainingData = new ArrayList<>();
+        this.testData = new ArrayList<>();
     	this.example = new String[attributesQuantity+1];
     	this.dividedData = new ArrayList<>();
     	this.classes = new ArrayList<>();
-    	this.sc = new Scanner(System.in);
-    	classValues[0] = "Iris-setosa";
-    	classValues[1] = "Iris-versicolor";
-    	classValues[2] = "Iris-virginica";
-    }
+	}
     
-    public void loadData()
-    {
-    	getInfoFromUser();
-    	initialise();
-    	
-    	try 
-    	{
-    		while (!getDataFromFile(dataFileName))
-    		{
-    			this.dataFileName = getStringFromUser("path to data file");
-    		}
-			
-    		/*
-			int i = 0;
-			for (List al : classes)
-			{
-				System.out.println("Size of class" + i + ": " + al.size());
-				i++;
-			}
-			*/
-			System.out.println("Data aquisition finished successfuly.");
-		} 
-    	catch (IOException e) 
-    	{
-			e.printStackTrace();
-		}
-    }
-    
-    private boolean getDataFromFile(String dataFileName) throws IOException 
+    public boolean getDataFromFile(String dataFileName)
     {
     	BufferedReader dataFileReader = null;
     	
@@ -100,9 +85,10 @@ public class DataAcquisitor
         	}
         	
         	dataFileReader.close();
+        	System.out.println("Data aquisition finished successfuly.");
         	return true;
     	}
-    	catch (FileNotFoundException e)
+    	catch (IOException e)
     	{
     		System.out.println("The file does not exist in this path.");
     		return false;
@@ -328,9 +314,9 @@ public class DataAcquisitor
     	
     }
     
-    public void writeDataToFile()
+    public void writeDataToFile(String path)
     {
-    	String writeFile = "/home/michal/workspace/Classification/src/classification/Datasets/Wine/wineNew.data.txt";
+    	String writeFile = path;
 
 		BufferedWriter dataFileWriter;
 		try 
@@ -403,16 +389,13 @@ public class DataAcquisitor
     	return trainingData;
     }
      
-    public List<String[]> getTestData(int chunkFrom, int chunkTo)
+    public void appendTestData(int chunkFrom, int chunkTo)
     {
-    	List<String[]> testData = new ArrayList<>();
     	List<String[]> dataClass;
     	String[] example;
     	
-    	int j;
     	for (int i = chunkFrom; i < chunkTo; i++)
     	{
-    		j = 0;
     		for(Iterator<List<String[]>> iterator = dividedData.get(i).iterator(); iterator.hasNext();)
     		{
     			dataClass = iterator.next();
@@ -423,57 +406,14 @@ public class DataAcquisitor
     				//example[attributesQuantity] = "";
     				testData.add(example);
     			}
-    			j++;
     		}	
     	}	
-    	
-    	
-    	
+
+    }
+    
+    public List<String[]> getTestData()
+    {
     	return testData;
-    }
-
-    private void getInfoFromUser()
-    {
-    	/*dataFileName = getStringFromUser("path to data file");
-    	
-    	while(attributesQuantity == 0)
-    		attributesQuantity = getValueFromUser("quantity of attributes");
-    	
-    	while(classesQuantity == 0)
-    		classesQuantity = getValueFromUser("quantity of classes");*/
-    	this.dataFileName = "iris.data.txt";
-    	this.attributesQuantity = 4;
-    	this.classesQuantity = 3;
-    	
-    }
-    
-    public int getValueFromUser(String valueName)
-    {
-
-    	int value = 0;
-        System.out.print("Enter " + valueName + ": ");
-        
-        try
-        {
-            value = sc.nextInt();
-        }
-
-        catch(InputMismatchException e)
-        {
-        	System.out.println("Unaccepted data type inserted");
-        	value = 0;
-        }
-    
-        return value;
-    }
-    
-    public String getStringFromUser(String valueName)
-    {
-        System.out.print("Enter " + valueName + ": ");
-        
-        String value = sc.next();
-
-        return value;
     }
 
 }

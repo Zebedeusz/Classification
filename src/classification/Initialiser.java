@@ -7,6 +7,67 @@ public class Initialiser {
 
     public static void main(String[] args)
     {
+    	
+    	Director director = Director.getInstance();
+    	director.beginWork();
+    	
+    	/*
+    	
+    	UserInteractor userInteractor =  UserInteractor.getInstance();
+    	int userPick;
+    	userPick = userInteractor.displayMenu(1);
+    	
+    	while(userPick != 1 || userPick != 2)
+    	{
+    			System.out.println("Incorrect choice. Try again.\n");
+    			userPick = userInteractor.displayMenu(1);
+    	}
+    	
+    	if(userPick == 2)
+    		System.exit(0);
+    	else
+    	{
+    		DataAcquisitor dataAcq = DataAcquisitor.getInstance();
+    		String dataFileName = userInteractor.getStringFromUser("path to a data file");
+    		int classesQuantity = userInteractor.getValueFromUser("quantity of classes in the dataset");
+    		int attributesQuantity = userInteractor.getValueFromUser("quantity of attributes in examples");
+    		
+    		String[] classValues = new String[classesQuantity];
+    		for(int i = 0; i < classesQuantity; i++)
+    			classValues[i] = userInteractor.getStringFromUser("name of class " + i);
+    		
+    		dataAcq.initialise(dataFileName, classesQuantity, attributesQuantity, classValues);
+    		
+    		while(!dataAcq.getDataFromFile(dataFileName))
+    		{
+    			System.out.println("Incorrect path to a data file. Try again.");
+    			dataFileName = userInteractor.getStringFromUser("path to a data file");	
+    		}
+    		
+    		userPick = userInteractor.displayMenu(2);
+    		
+    	}
+    	
+    	
+    	
+    	
+    	
+    	
+    	classValues[0] = "Iris-setosa";
+    	classValues[1] = "Iris-versicolor";
+    	classValues[2] = "Iris-virginica";
+    	
+    	
+    	
+		while (!getDataFromFile(dataFileName))
+		{
+			this.dataFileName = getStringFromUser("path to data file");
+		}
+		
+    	
+        
+    	/*
+    	/*
         DataAcquisitor acq = new DataAcquisitor();
         acq.loadData();
         
@@ -21,7 +82,8 @@ public class Initialiser {
         Bayes bayes = new Bayes();
         bayes.setTrainingData(acq.getTrainingData());            
         List<String[]> classifiedData;
-        classifiedData = bayes.classifyExamples(acq.getTestData(4,6));
+        bayes.classifyExamples(acq.getTestData(4,6));
+        classifiedData = bayes.getClassifiedData();
         
         System.out.println("Size of classifiedData: " + classifiedData.size());
         
@@ -44,9 +106,9 @@ public class Initialiser {
         	System.out.println();
         	*/
         	
-        }
-        	
-        System.out.println("Matching values: " + cnt);
+        
+       	
+        //System.out.println("Matching values: " + cnt);
                
         /*
         System.out.println("Number of classes in trainingData:" + trainingData.size());
@@ -79,8 +141,9 @@ public class Initialiser {
         }
         System.out.println();
         */
-    }
+        
+    
     
 
-    
+    }
 }
