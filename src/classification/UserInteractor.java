@@ -6,7 +6,7 @@ import java.util.Scanner;
 public class UserInteractor 
 {
 	private static final UserInteractor instance = new UserInteractor();
-	private Scanner sc;
+	private Scanner sc = new Scanner(System.in);
 	
 	private UserInteractor(){};
 	
@@ -45,17 +45,24 @@ public class UserInteractor
     
     public int displayMenu()
     {
-        	System.out.println("Select an activity: \n"
+        	System.out.println("\nSelect an activity: \n"
 					+ "1. Load a new dataset from a file\n"
 					+ "2. Discretize attributes by width\n"
 					+ "3. Discretize attributes by frequency\n"
 					+ "4. Save the data to a file\n"
 					+ "5. Prepare the data for crossvalidation\n"
 					+ "6. Start classification\n"
-					+ "7. Close application");
+					+ "7. Close application\n");
 
     	return sc.nextInt();
+    }
+    
+    public int displayAvailableClassifiers()
+    {
+    	System.out.println("Select a classifier: \n"
+				+ "1. Naive Bayes Classifier\n");
 
+	return sc.nextInt();
     }
     
     

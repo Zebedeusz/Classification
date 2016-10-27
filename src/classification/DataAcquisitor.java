@@ -21,14 +21,22 @@ public class DataAcquisitor
 	private int attributesQuantity;
 	private int classesQuantity;
 	private String dataFileName;
-	String[] classValues;
+	private String[] classValues;
 	
+	public int getClassesQuantity() {
+		return classesQuantity;
+	}
+
+	public String[] getClassValues() {
+		return classValues;
+	}
+
 	//variables used for data manipulation
     private String[] example;
     private List <List<String[]>> classes;
     private List <List<List<String[]>>> dividedData;
-    List<List<String[]>> trainingData;
-    List<String[]> testData;
+    private List<List<String[]>> trainingData;
+    private List<String[]> testData;
     
     private DataAcquisitor(){};
     
@@ -39,13 +47,11 @@ public class DataAcquisitor
     	return instance;
     }
     
-    public void initialise(String dataFileName, int classesQuantity, int attributesQuantity, String[] classValues) 
+    public void initialise(String dataFileName) 
     {
     	this.dataFileName = dataFileName;
-    	this.classesQuantity = classesQuantity;
-    	this.attributesQuantity = attributesQuantity;
-    	this.classValues = classValues;
-    	
+    	this.classValues = new String[10];
+
         this.trainingData = new ArrayList<>();
         this.testData = new ArrayList<>();
     	this.example = new String[attributesQuantity+1];
@@ -53,12 +59,52 @@ public class DataAcquisitor
     	this.classes = new ArrayList<>();
 	}
     
-    public boolean getDataFromFile(String dataFileName)
+    private void inspectData() throws IOException
     {
+    	BufferedReader dataFileReader = new BufferedReader(new FileReader(dataFileLocation + dataFileName));
+    	
+    	String[] tempClassValues = new String[30];
+    	this.attributesQuantity = dataFileReader.readLine().split(",").length-1;
+    	tempClassValues[0] = dataFileReader.readLine().split(",")[attributesQuantity];
+    	this.classesQuantity = 1;
+    	
+    	
+    	String classValue;
+    	while (dataFileReader.ready())
+    	{
+    		classValue = dataFileReader.readLine().split(",")[attributesQuantity];
+    		
+    		boolean notFound = true;
+    		for(int i = 0; i < classesQuantity; i++)
+    		{
+	    		if(tempClassValues[i].equals(classValue))
+	    		{
+	    			notFound = false;
+	    			break;
+	    		}		
+    		}
+    		
+    		if(notFound)
+    		{
+    			tempClassValues[classesQuantity] = classValue;
+    			this.classesQuantity++;
+    		}
+    	}
+    	
+    	this.classValues = tempClassValues;
+    	tempClassValues = null;
+    	dataFileReader.close();
+    }
+    
+    public boolean getDataFromFile()
+    {
+    	
     	BufferedReader dataFileReader = null;
     	
     	try
     	{
+    		inspectData();
+    		
     		dataFileReader = new BufferedReader(new FileReader(dataFileLocation + dataFileName));
     		
         	if (!classes.isEmpty())
@@ -98,6 +144,7 @@ public class DataAcquisitor
     public void divideData(int chunks)
     {
 		int dividedClassSize;
+		dividedData = new ArrayList<>();
 		
     	for (int i = 0; i < chunks; i++)
     	{
@@ -362,9 +409,12 @@ public class DataAcquisitor
     	List<String[]> dataClass;
     	int j;
     	
-    	for (int i = 0; i < classesQuantity; i++)
+    	if(trainingData.isEmpty())
     	{
-    		trainingData.add(new ArrayList<>());
+	    	for (int i = 0; i < classesQuantity; i++)
+	    	{
+	    		trainingData.add(new ArrayList<>());
+	    	}
     	}
     	
     	for (int i = chunkFrom; i < chunkTo; i++)
@@ -376,19 +426,23 @@ public class DataAcquisitor
     			
     			for(int k = 0; k < dataClass.size(); k++)
     			{
-    				trainingData.get(j).add(dataClass.get(k));
+    				this.trainingData.get(j).add(dataClass.get(k));
     			}
     			j++;
     		}	
-    	}	
-    	
+    	}		
     }
     
     public List<List<String[]>> getTrainingData()
     {
-    	return trainingData;
+    	return this.trainingData;
     }
      
+    public void clearTrainingData()
+    {
+    	trainingData = new ArrayList<>();
+    }
+    
     public void appendTestData(int chunkFrom, int chunkTo)
     {
     	List<String[]> dataClass;
@@ -414,6 +468,16 @@ public class DataAcquisitor
     public List<String[]> getTestData()
     {
     	return testData;
+    }
+    
+    public void clearTestData()
+    {
+    	testData = new ArrayList<>();
+    }
+    
+    public List <List<List<String[]>>> getDividedData()
+    {
+    	return dividedData;
     }
 
 }

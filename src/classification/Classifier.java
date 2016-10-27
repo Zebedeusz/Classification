@@ -2,10 +2,10 @@ package classification;
 
 import java.util.List;
 
-public class Classifier 
+public abstract class Classifier 
 {
-	protected List<List<String[]>> trainingData;
-	protected List<String[]> classifiedData;
+	public List<List<String[]>> trainingData;
+	public List<String[]> classifiedData;
 	
 	public void setTrainingData(List<List<String[]>> trainingData)
 	{
