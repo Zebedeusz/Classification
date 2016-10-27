@@ -1,7 +1,5 @@
 package classification;
 
-import java.util.List;
-
 public class Director 
 {
 	
@@ -17,6 +15,8 @@ public class Director
 	
 	private DataAcquisitor dataAcq = DataAcquisitor.getInstance();
 	private UserInteractor userInteractor = UserInteractor.getInstance();
+	private Bayes bayes = new Bayes();
+	private F_Measure fMeasure = F_Measure.getInstance();
 	
 	private boolean dataLoaded = false;
 	private boolean crossValidPerformed = false;
@@ -36,21 +36,23 @@ public class Director
 	
 	private void discretize(int typeOfDiscretization)
 	{
-		int attrNumber = userInteractor.getValueFromUser("number of attribute to discretize");
+		String[] attrNumbers = userInteractor.getStringArrayFromUser("numbers of attributes to discretize");
 		int bins = userInteractor.getValueFromUser("quantity of bins for the attribute values");
 		
 		switch(typeOfDiscretization)
 		{
 		case(1):
-			dataAcq.discretizeAttributeByWidth(attrNumber, bins);
+			for(int i = 0; i < attrNumbers.length; i++)
+				dataAcq.discretizeAttributeByWidth(Integer.parseInt(attrNumbers[i]), bins);
 			break;
 		
 		case(2):
-			dataAcq.discretizeAttributeByFrequency(attrNumber, bins);
+			for(int i = 0; i < attrNumbers.length; i++)
+				dataAcq.discretizeAttributeByFrequency(Integer.parseInt(attrNumbers[i]), bins);
 			break;
 		}
 		
-		System.out.println("Discretization of attribute number " + attrNumber + " into " + bins + "bins performed successfuly");
+		System.out.println("Discretization of attributes into " + bins + " bins performed successfuly");
 	}
 	
 	private void classify()
@@ -58,17 +60,19 @@ public class Director
 		switch(ensureCorrectEnteredClassifierValue(userInteractor.displayAvailableClassifiers(), 1, 1))
 		{
 		case(1):
-			Bayes bayes = new Bayes();
-			F_Measure fMeasure = F_Measure.getInstance();
 			int dividedDataSize = dataAcq.getDividedData().size();
-			int[][] scores;
+			String filePath = dataAcq.getDataFileLocation() + dataAcq.getDataFileName() + "_measures";
+			int[][][] scores = new int[dividedDataSize][dataAcq.getClassesQuantity()][dataAcq.getClassesQuantity()];
+			double[][] recalls = new double[dividedDataSize][dataAcq.getClassesQuantity()];
+			double[][] precisions = new double[dividedDataSize][dataAcq.getClassesQuantity()];
+			double[] accuracies = new double[dividedDataSize];
 			//System.out.println("Size of divededData: " + dividedDataSize);
 			for(int i = 0; i < dividedDataSize; i++)
 			{
 				dataAcq.clearTrainingData();
 				dataAcq.clearTestData();
 				
-				System.out.println("Iteration: " + i);
+				//System.out.println("Iteration: " + i);
 				
 				dataAcq.appendTestData(i, i+1);
 				
@@ -78,37 +82,26 @@ public class Director
 					dataAcq.appendTrainingData(0, i);
 				
 				bayes.setTrainingData(dataAcq.getTrainingData());
-				//System.out.println("Size of trainingData: " + bayes.trainingData.size());
-				//System.out.println("Size of testData: " + dataAcq.getTestData().size());
 				bayes.classifyExamples(dataAcq.getTestData());
 				fMeasure.calculateScores(bayes.getClassifiedData(), dataAcq.getClassesQuantity(), dataAcq.getClassValues());
 				
-				scores = fMeasure.getScores();
+				scores[i] = fMeasure.getScores();
+				recalls[i] = fMeasure.getRecall();
+				precisions[i] = fMeasure.getPrecision();
+				accuracies[i] = fMeasure.getAccuracy();
 				
-				System.out.print("		");
-				for(int j = 0; j < dataAcq.getClassValues().length; j++)
-				{
-					System.out.print(dataAcq.getClassValues()[j] + " ");
-				}
-				
-				for(int k = 0; k < scores.length; k++)
-				{
-					System.out.print("\n" + dataAcq.getClassValues()[k] + " ");
-					
-					for(int l = 0; l < scores.length; l++)
-						System.out.print("\n" + scores[k][l]);
-					
-				}
-
-				
-				for(int j = 0; j < fMeasure.getPrecision().length; j++)
-				{
-					System.out.println("Precision: " + fMeasure.getPrecision()[j]);
-					System.out.println("Recall: " + fMeasure.getRecall()[j]);
-				}
-
-				System.out.println("Accuracy: " + fMeasure.getAccuracy());
+				//fMeasure.writeMeasuresToFile(filePath, dataAcq.getClassesQuantity(), dataAcq.getClassValues());
 			}
+			
+			System.out.println("Classification performed successfuly.");
+			
+			fMeasure.calculateMeanAccuracy(accuracies);
+			fMeasure.calculateMeanPrecisions(precisions);
+			fMeasure.calculateMeanRecalls(recalls);
+			fMeasure.calculateMeanScores(scores);
+			
+			fMeasure.writeMeansOfMeasuresToFile(filePath, dataAcq.getClassesQuantity(), dataAcq.getClassValues());
+			System.out.println("Confusion matrix with f-measures saved to a file.");
 			break;
 		}
 	}
@@ -165,6 +158,7 @@ public class Director
 			discretize(2);
 			break;
 		case(4):
+			//bayes.writeDataToFile(userInteractor.getStringFromUser("full path where to save the data"), dataAcq.getAttributesQuantity());
 			dataAcq.writeDataToFile(userInteractor.getStringFromUser("full path where to save the data"));
 			break;
 		case(5):

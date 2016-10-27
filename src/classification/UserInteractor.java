@@ -43,6 +43,15 @@ public class UserInteractor
         return value;
     }
     
+    public String[] getStringArrayFromUser(String valueName)
+    {
+        System.out.print("Enter " + valueName + ": ");
+        
+        String[] value = sc.next().split(",");
+
+        return value;
+    }
+    
     public int displayMenu()
     {
         	System.out.println("\nSelect an activity: \n"

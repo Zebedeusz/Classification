@@ -2,23 +2,20 @@ package classification;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.InputMismatchException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Scanner;
 
 public class DataAcquisitor 
 {
 	private final String dataFileLocation = "/home/michal/workspace/Classification/src/classification/Datasets/";
-	
+
 	//info about data from user
 	private int attributesQuantity;
+
 	private int classesQuantity;
 	private String dataFileName;
 	private String[] classValues;
@@ -29,6 +26,17 @@ public class DataAcquisitor
 
 	public String[] getClassValues() {
 		return classValues;
+	}
+	public int getAttributesQuantity() {
+		return attributesQuantity;
+	}
+	
+	public String getDataFileLocation() {
+		return dataFileLocation;
+	}
+
+	public String getDataFileName() {
+		return dataFileName;
 	}
 
 	//variables used for data manipulation
@@ -245,120 +253,86 @@ public class DataAcquisitor
     
     public void discretizeAttributeByFrequency (int attrNumber, int bins)
     {
-    	List<String[]> examples = new ArrayList<String[]>();
     	
-    	BufferedReader dataFileReader = null;
-    	BufferedWriter dataFileWriter = null;
-		try 
-		{
-			dataFileReader = new BufferedReader(new FileReader(dataFileLocation + dataFileName));
+	List<String[]> examples = new ArrayList<String[]>();
 
-			dataFileWriter = new BufferedWriter(new FileWriter(dataFileLocation + dataFileName + "_sorted"));
-			
-			//reading data from initial file
-	    	while (dataFileReader.ready())
-	    	{
-	    		examples.add(dataFileReader.readLine().split(","));
-	    	}
-	    	
-	    	dataFileReader.close();
-	    	
-	    	//sorting examples list
-	    	String[] tempExample;
-	    	for(int i = 1; i < examples.size()-1; i++)
-	    	{
-	    		int j = i;
-	    		while((j > 0) && (Double.parseDouble(examples.get(j-1)[attrNumber]) > Double.parseDouble(examples.get(j)[attrNumber])))
-				{
-	    			tempExample = examples.get(j-1);
-	    			examples.set(j-1,examples.get(j));
-	    			examples.set(j,tempExample);
-	    			j--;
-				}
-	
-	    	}
-	    	
-	    	//discretisation 
-	    	int binSize = examples.size()/bins;
-	    	int leftExamples = examples.size()%bins;
-	    	int j = 0;
-	    	int compValue = 0;
-	    	String newAttrValue;
-	    	
-			for(int i = 0; i < bins; i++)
+		for (Iterator<List<String[]>> iteratorClasses = classes.iterator(); iteratorClasses.hasNext();)
+    	{	
+    		for (Iterator<String[]> iteratorExamples = iteratorClasses.next().iterator(); iteratorExamples.hasNext();)
+    			examples.add(iteratorExamples.next());
+    	}
+    	
+    	//sorting examples list
+    	String[] tempExample;
+    	for(int i = 1; i < examples.size()-1; i++)
+    	{
+    		int j = i;
+    		while((j > 0) && (Double.parseDouble(examples.get(j-1)[attrNumber]) > Double.parseDouble(examples.get(j)[attrNumber])))
 			{
-				if(leftExamples > 0)
-					newAttrValue = examples.get(j)[attrNumber] + "-" + examples.get(binSize*(i+1)+compValue)[attrNumber];
-				else
-					newAttrValue = examples.get(j)[attrNumber] + "-" + examples.get(binSize*(i+1)+compValue-1)[attrNumber];
-				
-				for(; j < binSize*(i+1) + compValue; j++)
-				{
-					//examples.get(j)[attrNumber] = "BIN" + String.valueOf(i+1);
-					examples.get(j)[attrNumber] = newAttrValue;
-				}
-				
-				if(leftExamples > 0)
-				{
-					//examples.get(binSize*(i+1))[attrNumber] = "BIN" + String.valueOf(i+1);
-					examples.get(binSize*(i+1)+compValue)[attrNumber] = newAttrValue;
-					compValue++;
-					j++;
-					leftExamples--;
-				}
+    			tempExample = examples.get(j-1);
+    			examples.set(j-1,examples.get(j));
+    			examples.set(j,tempExample);
+    			j--;
 			}
+
+    	}
     	
-	    	
-	    	for (Iterator<String[]> iterator = examples.iterator(); iterator.hasNext();) 
-	    	{
-	    		int i = 0;
-	    		for(String attrValue : iterator.next())
-	    		{
-	    			dataFileWriter.write(attrValue);
-	    			
-	    			if (i<attributesQuantity)
-	    				dataFileWriter.write(",");
-	    			
-	    			i++;
-	    		}
-	    		
-	    		dataFileWriter.write("\n");
-			}
-	    	
-	    	dataFileWriter.close();
-	    	
-			//writing discretised data to classes variable
-      		classes.clear();
-      		
-      		dataFileReader = new BufferedReader(new FileReader(dataFileLocation + dataFileName + "_sorted"));
-      		
-        	for (int i = 0; i < classesQuantity; i++)
-        	{
-        		classes.add(new ArrayList<String[]>());
-        	}
-        	
-        	while (dataFileReader.ready())
-        	{
-        		example = dataFileReader.readLine().split(",");
-        		
-        		for (int i = 0; i < classesQuantity; i++)
-        		{
-        			//System.out.println("class Value:" + example[attributesQuantity]);
-        			//System.out.println(classValues[i]);
-        			if (classValues[i].equals(example[attributesQuantity]))
-        			{
-        				classes.get(i).add(example);
-        				break;
-        			}
-        		}
-        	}
-        	dataFileReader.close();
-		} 
-		catch (IOException e) 
+    	//discretisation 
+    	int binSize = examples.size()/bins;
+    	int leftExamples = examples.size()%bins;
+    	int j = 0;
+    	int compValue = 0;
+    	String newAttrValue;
+    	
+		for(int i = 0; i < bins; i++)
 		{
-			e.printStackTrace();
+			if(leftExamples > 0)
+				newAttrValue = examples.get(j)[attrNumber] + "-" + examples.get(binSize*(i+1)+compValue)[attrNumber];
+			else
+				newAttrValue = examples.get(j)[attrNumber] + "-" + examples.get(binSize*(i+1)+compValue-1)[attrNumber];
+			
+			for(; j < binSize*(i+1) + compValue; j++)
+			{
+				//examples.get(j)[attrNumber] = "BIN" + String.valueOf(i+1);
+				examples.get(j)[attrNumber] = newAttrValue;
+			}
+			
+			if(leftExamples > 0)
+			{
+				//examples.get(binSize*(i+1))[attrNumber] = "BIN" + String.valueOf(i+1);
+				examples.get(binSize*(i+1)+compValue)[attrNumber] = newAttrValue;
+				compValue++;
+				j++;
+				leftExamples--;
+			}
 		}
-    	
+	
+		//writing discretised data to classes variable
+  		classes.clear();
+  		
+    	for (int i = 0; i < classesQuantity; i++)
+    	{
+    		classes.add(new ArrayList<String[]>());
+    	}
+	
+
+		for (Iterator<String[]> iteratorExamples = examples.iterator(); iteratorExamples.hasNext();)
+		{
+			example = iteratorExamples.next();
+    		for (int i = 0; i < classesQuantity; i++)
+    		{
+    			if (classValues[i].equals(example[attributesQuantity]))
+    			{
+    				classes.get(i).add(example);
+    				break;
+    			}
+    		}
+		}
+
+
+
+
+	
     }
     
     public void writeDataToFile(String path)

@@ -1,5 +1,8 @@
 package classification;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +15,11 @@ public class F_Measure
 	private double[] recall;
 	private double[] precision;
 	
+	private double[][] meanScores;
+	private double meanAccuracy;
+	private double[] meanRecall;
+	private double[] meanPrecision;
+	
 	private F_Measure(){};
 	
 	public static F_Measure getInstance()
@@ -19,9 +27,70 @@ public class F_Measure
 		return instance;
 	}
 	
-	public void writeMeasuresToFile()
+	public void writeMeansOfMeasuresToFile(String path, int classesQuantity, String[] classValues)
 	{
-		
+		try {
+			BufferedWriter dataFileWriter = new BufferedWriter(new FileWriter(path, true));
+			
+			dataFileWriter.write(" ,");
+			
+			for(int j = 0; j < classesQuantity; j++)
+				dataFileWriter.write(classValues[j] + ",");
+			
+			for(int k = 0; k < scores.length; k++)
+			{
+				dataFileWriter.write("\n" + classValues[k] + ",");
+				
+				for(int l = 0; l < meanScores.length; l++)
+					dataFileWriter.write(meanScores[k][l] + ",");
+			}
+			
+			for(int j = 0; j < meanPrecision.length; j++)
+			{
+				dataFileWriter.write("\nMean Precision: " + meanPrecision[j] + "\n");
+				dataFileWriter.write("Mean Recall: " + meanRecall[j] + "\n");
+			}
+
+			dataFileWriter.write("Mean Accuracy: " + meanAccuracy + "\n\n");
+			
+			dataFileWriter.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void writeMeasuresToFile(String path, int classesQuantity, String[] classValues)
+	{
+		try {
+			BufferedWriter dataFileWriter = new BufferedWriter(new FileWriter(path, true));
+			
+			dataFileWriter.write(" ,");
+			
+			for(int j = 0; j < classesQuantity; j++)
+				dataFileWriter.write(classValues[j] + ",");
+			
+			for(int k = 0; k < scores.length; k++)
+			{
+				dataFileWriter.write("\n" + classValues[k] + ",");
+				
+				for(int l = 0; l < scores.length; l++)
+					dataFileWriter.write(scores[k][l] + ",");
+			}
+			
+			for(int j = 0; j < precision.length; j++)
+			{
+				dataFileWriter.write("\nPrecision: " + precision[j] + "\n");
+				dataFileWriter.write("Recall: " + recall[j] + "\n");
+			}
+
+			dataFileWriter.write("Accuracy: " + accuracy + "\n\n");
+			
+			dataFileWriter.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void calculateScores(List<String[]> classifiedData, int classesQuantity, String[] classValues)
@@ -81,11 +150,11 @@ public class F_Measure
 			if(classifiedClass.size() != 0)
 				recall[classNumber] = ((double)scores[classNumber][classNumber]) / ((double)classifiedClass.size());
 			else
-				recall[classNumber] = -1;
+				recall[classNumber] = 0;
 			if(testOutcomePositive != 0)
 				precision[classNumber] = ((double)scores[classNumber][classNumber]) / ((double)testOutcomePositive);
 			else 
-				precision[classNumber] = -1;
+				precision[classNumber] = 0;
 			
 			classNumber++;
 		}
@@ -101,6 +170,7 @@ public class F_Measure
 		
 		return ((double)truths)/((double)totalSizeOfData);
 	}
+	
 	private void setZeroesInScoresArray()
 	{
 		for(int i = 0; i < this.scores.length; i++)
@@ -110,6 +180,88 @@ public class F_Measure
 				scores[i][j] = 0;
 			}
 		}
+	}
+	
+	public void calculateMeanScores(int[][][] allScores)
+	{
+		double[][] tempScores = new double[scores.length][scores.length];
+		
+		for (int k = 0; k < tempScores.length; k++)
+			for (int l = 0; l < tempScores.length; l++)
+				tempScores[k][l] = 0;
+		
+		for (int j = 0; j < allScores.length; j++)
+		{
+			for (int k = 0; k < scores.length; k++)
+			{
+				for (int l = 0; l < scores.length; l++)
+				{
+					tempScores[k][l] += (double) allScores[j][k][l];
+				}
+			}
+		}	
+		
+		for (int k = 0; k < scores.length; k++)
+		{
+			for (int l = 0; l < scores.length; l++)
+			{
+				tempScores[k][l] /= ((double) allScores.length);
+			}
+		}
+		
+		this.meanScores = tempScores;	
+	}
+	
+	public void calculateMeanRecalls(double[][] allRecalls)
+	{
+		double[] tempRec = new double[allRecalls[0].length];
+		
+		for (int k = 0; k < tempRec.length; k++)
+			tempRec[k] = 0;
+		
+		for(int i = 0; i < allRecalls.length; i++)
+		{
+			for(int j = 0; j < tempRec.length; j++)
+			{
+				tempRec[j] += allRecalls[i][j];
+			}
+		}
+		
+		for (int j = 0; j < tempRec.length; j++)
+			tempRec[j] /= ((double) allRecalls.length);
+		
+		this.meanRecall = tempRec;
+		
+	}
+	
+	public void calculateMeanPrecisions(double[][] allPrecisions)
+	{
+		double[] tempPrec = new double[allPrecisions[0].length];
+		
+		for (int k = 0; k < tempPrec.length; k++)
+			tempPrec[k] = 0;
+	
+		for(int i = 0; i < allPrecisions.length; i++)
+		{
+			for(int j = 0; j < tempPrec.length; j++)
+			{
+				tempPrec[j] += allPrecisions[i][j];
+			}
+		}
+		
+		for (int j = 0; j < tempPrec.length; j++)
+			tempPrec[j] /= ((double) allPrecisions.length);
+		
+		this.meanPrecision = tempPrec;
+	}
+	
+	public void calculateMeanAccuracy(double[] allAccuracies)
+	{
+		double tempAcc = 0;
+		for(double acc : allAccuracies)
+			tempAcc += acc;
+		
+		this.meanAccuracy = tempAcc/allAccuracies.length; 
 	}
 	
 	public int[][] getScores()
