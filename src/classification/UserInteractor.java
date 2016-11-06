@@ -56,12 +56,11 @@ public class UserInteractor
     {
         	System.out.println("\nSelect an activity: \n"
 					+ "1. Load a new dataset from a file\n"
-					+ "2. Discretize attributes by width\n"
-					+ "3. Discretize attributes by frequency\n"
-					+ "4. Save the data to a file\n"
-					+ "5. Prepare the data for crossvalidation\n"
-					+ "6. Start classification\n"
-					+ "7. Close application\n");
+					+ "2. Discretize attributes\n"
+					+ "3. Save the data to a file\n"
+					+ "4. Prepare the data for crossvalidation\n"
+					+ "5. Start classification\n"
+					+ "6. Close application\n");
 
     	return sc.nextInt();
     }
@@ -69,10 +68,20 @@ public class UserInteractor
     public int displayAvailableClassifiers()
     {
     	System.out.println("Select a classifier: \n"
-				+ "1. Naive Bayes Classifier\n");
+				+ "1. Naive Bayes Classifier\n"
+    			+ "2. Naive Bayes Classifier with normalization of continuous attributes\n"
+				+ "3. Inductive Learning Algorithm");
 
 	return sc.nextInt();
     }
     
+    public int displayAvailableDiscretizers()
+    {
+    	System.out.println("Select a distratization method: \n"
+				+ "1. by Width\n"
+    			+ "2. by Frequency\n");
+
+	return sc.nextInt();
+    }
     
 }

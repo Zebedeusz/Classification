@@ -14,11 +14,13 @@ public class F_Measure
 	private double accuracy;
 	private double[] recall;
 	private double[] precision;
-	
+	private double[] f_Measure;
+
 	private double[][] meanScores;
 	private double meanAccuracy;
 	private double[] meanRecall;
 	private double[] meanPrecision;
+	private double[] meanF_Measure;
 	
 	private F_Measure(){};
 	
@@ -45,13 +47,16 @@ public class F_Measure
 					dataFileWriter.write(meanScores[k][l] + ",");
 			}
 			
+			dataFileWriter.write("\n");
 			for(int j = 0; j < meanPrecision.length; j++)
 			{
-				dataFileWriter.write("\nMean Precision: " + meanPrecision[j] + "\n");
-				dataFileWriter.write("Mean Recall: " + meanRecall[j] + "\n");
+				dataFileWriter.write("\nClass " + classValues[j] + "\n");
+				dataFileWriter.write("Mean Precision," + meanPrecision[j] + "\n");
+				dataFileWriter.write("Mean Recall," + meanRecall[j] + "\n");
+				dataFileWriter.write("Mean f-measure," + meanF_Measure[j] + "\n");
 			}
 
-			dataFileWriter.write("Mean Accuracy: " + meanAccuracy + "\n\n");
+			dataFileWriter.write("\nMean Accuracy," + meanAccuracy + "\n\n");
 			
 			dataFileWriter.close();
 			
@@ -78,13 +83,15 @@ public class F_Measure
 					dataFileWriter.write(scores[k][l] + ",");
 			}
 			
+			dataFileWriter.write("\n");
 			for(int j = 0; j < precision.length; j++)
 			{
-				dataFileWriter.write("\nPrecision: " + precision[j] + "\n");
-				dataFileWriter.write("Recall: " + recall[j] + "\n");
+				dataFileWriter.write("\nClass " + classValues[j]);
+				dataFileWriter.write("\nPrecision," + precision[j] + "\n");
+				dataFileWriter.write("Recall," + recall[j] + "\n");
 			}
 
-			dataFileWriter.write("Accuracy: " + accuracy + "\n\n");
+			dataFileWriter.write("\nAccuracy," + accuracy + "\n\n");
 			
 			dataFileWriter.close();
 			
@@ -159,6 +166,7 @@ public class F_Measure
 			classNumber++;
 		}
 		accuracy = calculateAccuracy(classifiedData.size());
+		calculateF_Measure();
 	}
 	
 	private double calculateAccuracy(int totalSizeOfData)
@@ -264,6 +272,39 @@ public class F_Measure
 		this.meanAccuracy = tempAcc/allAccuracies.length; 
 	}
 	
+	private void calculateF_Measure()
+	{
+		this.f_Measure = new double[precision.length];
+		
+		for(int i = 0;  i < f_Measure.length; i++)
+		{
+			if(precision[i] == 0 && recall[i] == 0)
+			{
+				f_Measure[i] = 0; continue;
+			}
+				
+			f_Measure[i] = 2*( (precision[i] * recall[i]) / (precision[i] + recall[i]) );
+		}
+	}
+	
+	public void calculateMeanF_Measures(double[][] allF_Measures)
+	{
+		double[] tempF_Measures = new double[allF_Measures[0].length];
+		
+		for(int i = 0; i < allF_Measures.length; i++)
+		{
+			for(int j = 0; j < tempF_Measures.length; j++)
+			{
+				tempF_Measures[j] += allF_Measures[i][j];
+			}
+		}
+		
+		for(int j = 0; j < tempF_Measures.length; j++)
+			tempF_Measures[j] /= ((double) allF_Measures.length);
+		
+		this.meanF_Measure = tempF_Measures;
+	}
+	
 	public int[][] getScores()
 	{
 		return scores;
@@ -280,5 +321,10 @@ public class F_Measure
 	public double[] getPrecision() {
 		return precision;
 	}
+	
+	public double[] getF_Measure() {
+		return f_Measure;
+	}
+	
 	
 }

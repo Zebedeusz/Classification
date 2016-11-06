@@ -15,7 +15,6 @@ public class Director
 	
 	private DataAcquisitor dataAcq = DataAcquisitor.getInstance();
 	private UserInteractor userInteractor = UserInteractor.getInstance();
-	private Bayes bayes = new Bayes();
 	private F_Measure fMeasure = F_Measure.getInstance();
 	
 	private boolean dataLoaded = false;
@@ -56,17 +55,24 @@ public class Director
 	}
 	
 	private void classify()
-	{		
-		switch(ensureCorrectEnteredClassifierValue(userInteractor.displayAvailableClassifiers(), 1, 1))
-		{
+	{	
+		int dividedDataSize = dataAcq.getDividedData().size();
+		String filePath = dataAcq.getDataFileLocation() + dataAcq.getDataFileName() + "_measures";
+		int[][][] scores = new int[dividedDataSize][dataAcq.getClassesQuantity()][dataAcq.getClassesQuantity()];
+		double[][] recalls = new double[dividedDataSize][dataAcq.getClassesQuantity()];
+		double[][] precisions = new double[dividedDataSize][dataAcq.getClassesQuantity()];
+		double[] accuracies = new double[dividedDataSize];
+		double[][] fMeasures = new double[dividedDataSize][dataAcq.getClassesQuantity()];
+		
+		int chosenClassifier = ensureCorrectEnteredClassifierValue(userInteractor.displayAvailableClassifiers(), 1, 3);
+		switch(chosenClassifier)
+		{	
 		case(1):
-			int dividedDataSize = dataAcq.getDividedData().size();
-			String filePath = dataAcq.getDataFileLocation() + dataAcq.getDataFileName() + "_measures";
-			int[][][] scores = new int[dividedDataSize][dataAcq.getClassesQuantity()][dataAcq.getClassesQuantity()];
-			double[][] recalls = new double[dividedDataSize][dataAcq.getClassesQuantity()];
-			double[][] precisions = new double[dividedDataSize][dataAcq.getClassesQuantity()];
-			double[] accuracies = new double[dividedDataSize];
+		case(2):
 			//System.out.println("Size of divededData: " + dividedDataSize);
+			
+			Bayes bayes = new Bayes();
+		
 			for(int i = 0; i < dividedDataSize; i++)
 			{
 				dataAcq.clearTrainingData();
@@ -81,29 +87,52 @@ public class Director
 				if(i != 0)
 					dataAcq.appendTrainingData(0, i);
 				
+				if(chosenClassifier == 1)
+					bayes.setNormalize(false);
+				
+				if(chosenClassifier == 2)
+					bayes.setNormalize(true);
+				
 				bayes.setTrainingData(dataAcq.getTrainingData());
+				
 				bayes.classifyExamples(dataAcq.getTestData());
+				
 				fMeasure.calculateScores(bayes.getClassifiedData(), dataAcq.getClassesQuantity(), dataAcq.getClassValues());
 				
 				scores[i] = fMeasure.getScores();
 				recalls[i] = fMeasure.getRecall();
 				precisions[i] = fMeasure.getPrecision();
 				accuracies[i] = fMeasure.getAccuracy();
+				fMeasures[i] = fMeasure.getF_Measure();
 				
 				//fMeasure.writeMeasuresToFile(filePath, dataAcq.getClassesQuantity(), dataAcq.getClassValues());
 			}
 			
-			System.out.println("Classification performed successfuly.");
+			//bayes.writeDataToFile("/home/michal/workspace/Classification/src/classification/Datasets/Glass/xx.txt", 9);
+			break;
+		case(3):
+			InductiveLearningAlgorithm ILA = new InductiveLearningAlgorithm();
 			
-			fMeasure.calculateMeanAccuracy(accuracies);
-			fMeasure.calculateMeanPrecisions(precisions);
-			fMeasure.calculateMeanRecalls(recalls);
-			fMeasure.calculateMeanScores(scores);
+			dataAcq.clearTrainingData();
+			dataAcq.clearTestData();
+			dataAcq.appendTrainingData(6,10);
+			dataAcq.appendTestData(0,5);
 			
-			fMeasure.writeMeansOfMeasuresToFile(filePath, dataAcq.getClassesQuantity(), dataAcq.getClassValues());
-			System.out.println("Confusion matrix with f-measures saved to a file.");
+			ILA.setTrainingData(dataAcq.getTrainingData());
+			ILA.classifyExamples(dataAcq.getTestData());
+			
 			break;
 		}
+		
+		System.out.println("Classification performed successfuly.");
+		/*fMeasure.calculateMeanAccuracy(accuracies);
+		fMeasure.calculateMeanPrecisions(precisions);
+		fMeasure.calculateMeanRecalls(recalls);
+		fMeasure.calculateMeanScores(scores);
+		fMeasure.calculateMeanF_Measures(fMeasures);
+		
+		fMeasure.writeMeansOfMeasuresToFile(filePath, dataAcq.getClassesQuantity(), dataAcq.getClassValues());
+		System.out.println("Confusion matrix with f-measures saved to a file.");*/
 	}
 	
 	private int ensureCorrectEnteredClassifierValue(int userChoice, int minValue, int maxValue)
@@ -128,19 +157,30 @@ public class Director
     	return userChoice;
 	}
 	
+	private int ensureCorrectEnteredDiscretizerValue(int userChoice, int minValue, int maxValue)
+	{
+    	while(userChoice < minValue || userChoice > maxValue)
+    	{
+    			System.out.println("Incorrect choice. Try again.\n");
+    			userChoice = userInteractor.displayAvailableDiscretizers();
+    	}
+    	
+    	return userChoice;
+	}
+	
 	private void processUserChoice(int userChoice)
 	{
-		if((!this.dataLoaded) && (userChoice > 1 && userChoice < 7))
+		if((!this.dataLoaded) && (userChoice > 1 && userChoice < 6))
 		{
 			System.out.println("Dataset has to be loaded before performing this operation.");
-			processUserChoice(ensureCorrectEnteredMenuValue(userInteractor.displayMenu(), 1, 7));
+			processUserChoice(ensureCorrectEnteredMenuValue(userInteractor.displayMenu(), 1, 6));
 			return;
 		}
 		
-		else if((!this.crossValidPerformed) && (userChoice == 6))
+		else if((!this.crossValidPerformed) && (userChoice == 5))
 		{
 			System.out.println("Crossvalidation has to be done before performing this operation.");
-			processUserChoice(ensureCorrectEnteredMenuValue(userInteractor.displayMenu(), 1, 7));
+			processUserChoice(ensureCorrectEnteredMenuValue(userInteractor.displayMenu(), 1, 6));
 			return;
 		}
 			
@@ -152,33 +192,29 @@ public class Director
 			this.crossValidPerformed = false;
 			break;
 		case(2):
-			discretize(1);
+			discretize(ensureCorrectEnteredDiscretizerValue(userInteractor.displayAvailableDiscretizers(), 1, 2));
 			break;
 		case(3):
-			discretize(2);
-			break;
-		case(4):
 			//bayes.writeDataToFile(userInteractor.getStringFromUser("full path where to save the data"), dataAcq.getAttributesQuantity());
 			dataAcq.writeDataToFile(userInteractor.getStringFromUser("full path where to save the data"));
 			break;
-		case(5):
+		case(4):
 			dataAcq.divideData(userInteractor.getValueFromUser("quantity of data chunks in the dataset"));
 			System.out.println("Your data was prepared for crossvalidation.");
 			this.crossValidPerformed = true;
 			break;
-		case(6):
+		case(5):
 			classify();
 			break;
-		case(7):
+		case(6):
 			System.out.println("Closing application.");
 			System.exit(0);
-			
 		}
 	}
 	
 	public void beginWork()
 	{
 		while(true)
-			processUserChoice(ensureCorrectEnteredMenuValue(userInteractor.displayMenu(), 1, 7));
+			processUserChoice(ensureCorrectEnteredMenuValue(userInteractor.displayMenu(), 1, 6));
 	}
 }
