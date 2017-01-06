@@ -11,7 +11,7 @@ import java.util.List;
 
 public class DataAcquisitor 
 {
-	private final String dataFileLocation = "/home/michal/workspace/Classification/src/classification/Datasets/";
+	private final String dataFileLocation = "C:/Users/Micha³/Desktop/Semestr 2/Systemy ucz¹ce siê/Laboratorium/kNN/";
 
 	//info about data from user
 	private int attributesQuantity;
@@ -72,15 +72,15 @@ public class DataAcquisitor
     	BufferedReader dataFileReader = new BufferedReader(new FileReader(dataFileLocation + dataFileName));
     	
     	String[] tempClassValues = new String[30];
-    	this.attributesQuantity = dataFileReader.readLine().split(",").length-1;
-    	tempClassValues[0] = dataFileReader.readLine().split(",")[attributesQuantity];
+    	this.attributesQuantity = dataFileReader.readLine().split(",|\\t").length-1;
+    	tempClassValues[0] = dataFileReader.readLine().split(",|\\t")[attributesQuantity];
     	this.classesQuantity = 1;
     	
     	
     	String classValue;
     	while (dataFileReader.ready())
     	{
-    		classValue = dataFileReader.readLine().split(",")[attributesQuantity];
+    		classValue = dataFileReader.readLine().split(",|\\t")[attributesQuantity];
     		
     		boolean notFound = true;
     		for(int i = 0; i < classesQuantity; i++)
@@ -126,7 +126,7 @@ public class DataAcquisitor
         	
         	while (dataFileReader.ready())
         	{
-        		example = dataFileReader.readLine().split(",");
+        		example = dataFileReader.readLine().split(",|\\t");
 
         		for (int i = 0; i < classesQuantity; i++)
         		{

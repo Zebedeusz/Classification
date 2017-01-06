@@ -23,12 +23,11 @@ public abstract class Classifier
 	
     public void writeDataToFile(String path, int attributesQuantity)
     {
-    	String writeFile = path;
-
 		BufferedWriter dataFileWriter;
+		
 		try 
 		{
-			dataFileWriter = new BufferedWriter(new FileWriter(writeFile));
+			dataFileWriter = new BufferedWriter(new FileWriter(path));
 		for (Iterator<String[]> iteratorExamples = classifiedData.iterator(); iteratorExamples.hasNext();)
     	{	
 			int i = 0;

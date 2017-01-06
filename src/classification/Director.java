@@ -2,7 +2,6 @@ package classification;
 
 public class Director 
 {
-	
 	//singleton 
 	private static final Director instance = new Director();
 	
@@ -64,7 +63,7 @@ public class Director
 		double[] accuracies = new double[dividedDataSize];
 		double[][] fMeasures = new double[dividedDataSize][dataAcq.getClassesQuantity()];
 		
-		int chosenClassifier = ensureCorrectEnteredClassifierValue(userInteractor.displayAvailableClassifiers(), 1, 3);
+		int chosenClassifier = ensureCorrectEnteredClassifierValue(userInteractor.displayAvailableClassifiers(), 1, 4);
 		switch(chosenClassifier)
 		{	
 		case(1):
@@ -115,11 +114,26 @@ public class Director
 			
 			dataAcq.clearTrainingData();
 			dataAcq.clearTestData();
-			dataAcq.appendTrainingData(6,10);
-			dataAcq.appendTestData(0,5);
+			dataAcq.appendTrainingData(2,10);
+			dataAcq.appendTestData(0,2);
 			
 			ILA.setTrainingData(dataAcq.getTrainingData());
 			ILA.classifyExamples(dataAcq.getTestData());
+			
+			break;
+			
+			
+		case(4):
+			
+			K_NearestNeighbours kNN = new K_NearestNeighbours(5, DistanceCalculationMethod.Euclides, VotingApproach.democracy);
+			
+			dataAcq.clearTrainingData();
+			dataAcq.clearTestData();
+			dataAcq.appendTrainingData(6,10);
+			dataAcq.appendTestData(0,5);
+		
+			kNN.setTrainingData(dataAcq.getTrainingData());
+			kNN.classifyExamples(dataAcq.getTestData());
 			
 			break;
 		}

@@ -70,14 +70,15 @@ public class UserInteractor
     	System.out.println("Select a classifier: \n"
 				+ "1. Naive Bayes Classifier\n"
     			+ "2. Naive Bayes Classifier with normalization of continuous attributes\n"
-				+ "3. Inductive Learning Algorithm");
+				+ "3. Inductive Learning Algorithm\n"
+    			+ "4. K nearest neighbours");
 
 	return sc.nextInt();
     }
     
     public int displayAvailableDiscretizers()
     {
-    	System.out.println("Select a distratization method: \n"
+    	System.out.println("Select a discretization method: \n"
 				+ "1. by Width\n"
     			+ "2. by Frequency\n");
 

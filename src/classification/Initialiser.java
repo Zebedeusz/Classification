@@ -1,8 +1,5 @@
 package classification;
 
-import java.util.Iterator;
-import java.util.List;
-
 public class Initialiser {
 
     public static void main(String[] args)
