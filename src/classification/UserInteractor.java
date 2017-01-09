@@ -56,11 +56,12 @@ public class UserInteractor
     {
         	System.out.println("\nSelect an activity: \n"
 					+ "1. Load a new dataset from a file\n"
-					+ "2. Discretize attributes\n"
-					+ "3. Save the data to a file\n"
-					+ "4. Prepare the data for crossvalidation\n"
-					+ "5. Start classification\n"
-					+ "6. Close application\n");
+        			+ "2. Standarize attributes\n"
+					+ "3. Discretize attributes\n"
+					+ "4. Save the data to a file\n"
+					+ "5. Prepare the data for crossvalidation\n"
+					+ "6. Start classification\n"
+					+ "7. Close application\n");
 
     	return sc.nextInt();
     }

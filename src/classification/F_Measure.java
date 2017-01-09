@@ -133,7 +133,6 @@ public class F_Measure
 		int classNumber = 0;
 		int testOutcomePositive;
 		
-		//System.out.println("Classes size: " + classes.size());
 		for(Iterator<List<String[]>> iteratorClasses = classes.iterator(); iteratorClasses.hasNext();)
 		{
 			classifiedClass = iteratorClasses.next();

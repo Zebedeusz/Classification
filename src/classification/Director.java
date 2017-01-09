@@ -12,7 +12,7 @@ public class Director
 		return instance;
 	}
 	
-	private DataAcquisitor dataAcq = DataAcquisitor.getInstance();
+	public DataAcquisitor dataAcq = DataAcquisitor.getInstance();
 	private UserInteractor userInteractor = UserInteractor.getInstance();
 	private F_Measure fMeasure = F_Measure.getInstance();
 	
@@ -53,17 +53,18 @@ public class Director
 		System.out.println("Discretization of attributes into " + bins + " bins performed successfuly");
 	}
 	
-	private void classify()
+	public void classify()
 	{	
 		int dividedDataSize = dataAcq.getDividedData().size();
-		String filePath = dataAcq.getDataFileLocation() + dataAcq.getDataFileName() + "_measures";
+		String filePath = dataAcq.getDataFileLocation() + dataAcq.getDataFileName() + "_measures.txt";
 		int[][][] scores = new int[dividedDataSize][dataAcq.getClassesQuantity()][dataAcq.getClassesQuantity()];
 		double[][] recalls = new double[dividedDataSize][dataAcq.getClassesQuantity()];
 		double[][] precisions = new double[dividedDataSize][dataAcq.getClassesQuantity()];
 		double[] accuracies = new double[dividedDataSize];
 		double[][] fMeasures = new double[dividedDataSize][dataAcq.getClassesQuantity()];
 		
-		int chosenClassifier = ensureCorrectEnteredClassifierValue(userInteractor.displayAvailableClassifiers(), 1, 4);
+		//int chosenClassifier = ensureCorrectEnteredClassifierValue(userInteractor.displayAvailableClassifiers(), 1, 4);
+		int chosenClassifier = 4;
 		switch(chosenClassifier)
 		{	
 		case(1):
@@ -122,31 +123,92 @@ public class Director
 			
 			break;
 			
-			
 		case(4):
 			
 			K_NearestNeighbours kNN = new K_NearestNeighbours(5, DistanceCalculationMethod.Euclides, VotingApproach.democracy);
 			
-			dataAcq.clearTrainingData();
-			dataAcq.clearTestData();
-			dataAcq.appendTrainingData(6,10);
-			dataAcq.appendTestData(0,5);
+			for(int i = 0; i < dividedDataSize; i++)
+			{
+				dataAcq.clearTrainingData();
+				dataAcq.clearTestData();
+				
+				dataAcq.appendTestData(i, i+1);
+				
+				if(i+1 != dividedDataSize)
+					dataAcq.appendTrainingData(i+1, dividedDataSize);
+				if(i != 0)
+					dataAcq.appendTrainingData(0, i);
 		
-			kNN.setTrainingData(dataAcq.getTrainingData());
-			kNN.classifyExamples(dataAcq.getTestData());
+				kNN.setTrainingData(dataAcq.getTrainingData());
+				kNN.classifyExamples(dataAcq.getTestData());
+				
+				fMeasure.calculateScores(kNN.getClassifiedData(), dataAcq.getClassesQuantity(), dataAcq.getClassValues());
+				
+				scores[i] = fMeasure.getScores();
+				recalls[i] = fMeasure.getRecall();
+				precisions[i] = fMeasure.getPrecision();
+				accuracies[i] = fMeasure.getAccuracy();
+				fMeasures[i] = fMeasure.getF_Measure();
+			}
 			
 			break;
 		}
 		
 		System.out.println("Classification performed successfuly.");
-		/*fMeasure.calculateMeanAccuracy(accuracies);
+		fMeasure.calculateMeanAccuracy(accuracies);
 		fMeasure.calculateMeanPrecisions(precisions);
 		fMeasure.calculateMeanRecalls(recalls);
 		fMeasure.calculateMeanScores(scores);
 		fMeasure.calculateMeanF_Measures(fMeasures);
 		
 		fMeasure.writeMeansOfMeasuresToFile(filePath, dataAcq.getClassesQuantity(), dataAcq.getClassValues());
-		System.out.println("Confusion matrix with f-measures saved to a file.");*/
+		System.out.println("Confusion matrix with f-measures saved to a file.");
+	}
+	
+	public void classifyKNN(int k, DistanceCalculationMethod distanceCalculationMethod, VotingApproach votingApproach)
+	{
+		int dividedDataSize = dataAcq.getDividedData().size();
+		String filePath = dataAcq.getDataFileLocation() + dataAcq.getDataFileName() + "_" + String.valueOf(k) + "_" + distanceCalculationMethod.toString() + "_" + votingApproach.toString() + ".txt";
+		int[][][] scores = new int[dividedDataSize][dataAcq.getClassesQuantity()][dataAcq.getClassesQuantity()];
+		double[][] recalls = new double[dividedDataSize][dataAcq.getClassesQuantity()];
+		double[][] precisions = new double[dividedDataSize][dataAcq.getClassesQuantity()];
+		double[] accuracies = new double[dividedDataSize];
+		double[][] fMeasures = new double[dividedDataSize][dataAcq.getClassesQuantity()];
+		
+		K_NearestNeighbours kNN = new K_NearestNeighbours(5, DistanceCalculationMethod.Euclides, VotingApproach.democracy);
+		
+		for(int i = 0; i < dividedDataSize; i++)
+		{
+			dataAcq.clearTrainingData();
+			dataAcq.clearTestData();
+			
+			dataAcq.appendTestData(i, i+1);
+			
+			if(i+1 != dividedDataSize)
+				dataAcq.appendTrainingData(i+1, dividedDataSize);
+			if(i != 0)
+				dataAcq.appendTrainingData(0, i);
+	
+			kNN.setTrainingData(dataAcq.getTrainingData());
+			kNN.classifyExamples(dataAcq.getTestData());
+			
+			fMeasure.calculateScores(kNN.getClassifiedData(), dataAcq.getClassesQuantity(), dataAcq.getClassValues());
+			
+			scores[i] = fMeasure.getScores();
+			recalls[i] = fMeasure.getRecall();
+			precisions[i] = fMeasure.getPrecision();
+			accuracies[i] = fMeasure.getAccuracy();
+			fMeasures[i] = fMeasure.getF_Measure();
+		}
+			System.out.println("Classification performed successfuly.");
+			fMeasure.calculateMeanAccuracy(accuracies);
+			fMeasure.calculateMeanPrecisions(precisions);
+			fMeasure.calculateMeanRecalls(recalls);
+			fMeasure.calculateMeanScores(scores);
+			fMeasure.calculateMeanF_Measures(fMeasures);
+			
+			fMeasure.writeMeansOfMeasuresToFile(filePath, dataAcq.getClassesQuantity(), dataAcq.getClassValues());
+			System.out.println("Confusion matrix with f-measures saved to a file.");
 	}
 	
 	private int ensureCorrectEnteredClassifierValue(int userChoice, int minValue, int maxValue)
@@ -184,17 +246,17 @@ public class Director
 	
 	private void processUserChoice(int userChoice)
 	{
-		if((!this.dataLoaded) && (userChoice > 1 && userChoice < 6))
+		if((!this.dataLoaded) && (userChoice > 1 && userChoice < 7))
 		{
 			System.out.println("Dataset has to be loaded before performing this operation.");
-			processUserChoice(ensureCorrectEnteredMenuValue(userInteractor.displayMenu(), 1, 6));
+			processUserChoice(ensureCorrectEnteredMenuValue(userInteractor.displayMenu(), 1, 7));
 			return;
 		}
 		
-		else if((!this.crossValidPerformed) && (userChoice == 5))
+		else if((!this.crossValidPerformed) && (userChoice == 6))
 		{
 			System.out.println("Crossvalidation has to be done before performing this operation.");
-			processUserChoice(ensureCorrectEnteredMenuValue(userInteractor.displayMenu(), 1, 6));
+			processUserChoice(ensureCorrectEnteredMenuValue(userInteractor.displayMenu(), 1, 7));
 			return;
 		}
 			
@@ -206,21 +268,25 @@ public class Director
 			this.crossValidPerformed = false;
 			break;
 		case(2):
-			discretize(ensureCorrectEnteredDiscretizerValue(userInteractor.displayAvailableDiscretizers(), 1, 2));
+			dataAcq.standarizeData();
+			System.out.println("Your data was standarized.");
 			break;
 		case(3):
+			discretize(ensureCorrectEnteredDiscretizerValue(userInteractor.displayAvailableDiscretizers(), 1, 2));
+			break;
+		case(4):
 			//bayes.writeDataToFile(userInteractor.getStringFromUser("full path where to save the data"), dataAcq.getAttributesQuantity());
 			dataAcq.writeDataToFile(userInteractor.getStringFromUser("full path where to save the data"));
 			break;
-		case(4):
+		case(5):
 			dataAcq.divideData(userInteractor.getValueFromUser("quantity of data chunks in the dataset"));
 			System.out.println("Your data was prepared for crossvalidation.");
 			this.crossValidPerformed = true;
 			break;
-		case(5):
+		case(6):
 			classify();
 			break;
-		case(6):
+		case(7):
 			System.out.println("Closing application.");
 			System.exit(0);
 		}
@@ -229,6 +295,6 @@ public class Director
 	public void beginWork()
 	{
 		while(true)
-			processUserChoice(ensureCorrectEnteredMenuValue(userInteractor.displayMenu(), 1, 6));
+			processUserChoice(ensureCorrectEnteredMenuValue(userInteractor.displayMenu(), 1, 7));
 	}
 }

@@ -2,9 +2,13 @@ package classification;
 
 import java.sql.Savepoint;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+
+
 import javafx.util.Pair;
 
 enum DistanceCalculationMethod
@@ -14,7 +18,7 @@ enum DistanceCalculationMethod
 
 enum VotingApproach
 {
-	democracy, theCloserTheBetter
+	democracy, theCloserTheBetter, doubleWeighted
 }
 
 public class K_NearestNeighbours extends Classifier
@@ -153,13 +157,53 @@ public class K_NearestNeighbours extends Classifier
 				classOfExample = mostFrequentClass;
 				
 				break;
+				
+			case doubleWeighted:
+				
+				//sorting examplesWithDistance with ascending order
+				Collections.sort(examplesWithDistance, new Comparator<Pair<String[], Double>>() 
+				{
+				    @Override
+				    public int compare(final Pair<String[], Double> o1, final Pair<String[], Double> o2) 
+				    {
+				        return (int) (o1.getValue() - o2.getValue());
+				    }
+				});
+				
+				//calculating weights
+				List<Pair<String, Double>> doubleClassesWeights = new ArrayList<>();
+				double maxDist = examplesWithDistance.get(examplesWithDistance.size() - 1).getValue();
+				double minDist = examplesWithDistance.get(1).getValue();
+				
+				//TODO
+				for(int i = 1; i <= examplesWithDistance.size(); i++)
+				{
+					double weight;
+					
+					if(i == examplesWithDistance.size())
+						weight = 0;
+					else
+					{
+						weight = ((maxDist - examplesWithDistance.get(i).getValue()) / (maxDist - minDist)) * (1/i);
+					}
+					
+					doubleClassesWeights.add(new Pair(examplesWithDistance.get(i).getKey(), weight));
+				}
+				
+				
+
+				
+				
+				
+				break;
 		}
+		
 		
 		
 		return classOfExample;
 	}
 	
-	private void standarize(List<String[]> listToBeStandarized)
+	/*private void standarize(List<String[]> listToBeStandarized)
 	{
 		double[] attributeMeans = new double[listToBeStandarized.get(0).length];
 
@@ -215,7 +259,7 @@ public class K_NearestNeighbours extends Classifier
 				example[i] = String.valueOf((attrValue - attributeMeans[i]) / attributeStds[i]);
 			}
 		}	
-	}
+	}*/
 
 	public void classifyExamples(List<String[]> testData)
 	{
@@ -226,7 +270,7 @@ public class K_NearestNeighbours extends Classifier
 		
 		for (Iterator<List<String[]>> iteratorClasses = trainingData.iterator(); iteratorClasses.hasNext();)
 			simplifiedTrainingData.addAll(iteratorClasses.next());
-		
+		/*
 		List<String[]> tempSimplifiedTrainingData = new ArrayList<>();
 		
 		for (Iterator<String[]> iteratorSimplifiedTrainingData = simplifiedTrainingData.iterator(); iteratorSimplifiedTrainingData.hasNext();)
@@ -239,11 +283,24 @@ public class K_NearestNeighbours extends Classifier
 			
 			tempSimplifiedTrainingData.add(exampleToAdd);
 		}
-
+		
 		//preparation:
 			//standarize all examples in test data and training data
-			standarize(tempSimplifiedTrainingData);
-			standarize(testData);
+			//standarize(tempSimplifiedTrainingData);
+			//standarize(testData);
+			
+			for (int i = 0; i < simplifiedTrainingData.size(); i++)
+			{
+				String[] example = new String[simplifiedTrainingData.get(0).length];
+				
+				for(int j = 0; j < example.length - 1; j++)
+					example[j] = tempSimplifiedTrainingData.get(i)[j];
+				
+				example[example.length - 1] = simplifiedTrainingData.get(i)[simplifiedTrainingData.get(i).length - 1];
+				
+				simplifiedTrainingData.set(i, example);
+			}*/
+
 			
 		//for all elements in testData:
 			//find nearestNeighboursQnt examples closest to particular test example by:
@@ -295,21 +352,16 @@ public class K_NearestNeighbours extends Classifier
 				}
 			}
 			
-			String[] example = new String[simplifiedTrainingData.get(0).length];
+			String[] example = new String[simplifiedTrainingData.get(0).length + 1];
 			
-			for(int i = 0; i < example.length - 1; i++)
+			for(int i = 0; i < testExample.length; i++)
 				example[i] = testExample[i];
 			
 			example[example.length - 1] = voteForClass();
 			
-			System.out.println(voteForClass());
+			//System.out.println(voteForClass());
 			
-			classifiedData.add(example);
+			this.classifiedData.add(example);
 		}
-		
-		writeDataToFile("C:/Users/Micha³/Desktop/Semestr 2/Systemy ucz¹ce siê/Laboratorium/kNN/xx.txt", 7);
 	}
-
-	
-	
 }

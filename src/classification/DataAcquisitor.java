@@ -119,10 +119,7 @@ public class DataAcquisitor
         		classes.clear();
         	
         	for (int i = 0; i < classesQuantity; i++)
-        	{
         		classes.add(new ArrayList<String[]>());
-        		//classValues[i] = getStringFromUser("value of class" + i);
-        	}
         	
         	while (dataFileReader.ready())
         	{
@@ -453,5 +450,116 @@ public class DataAcquisitor
     {
     	return dividedData;
     }
+    
+    public void standarizeData()
+	{
+		List<String[]> simplifiedClassesList = new ArrayList<>();
+		List<String[]> tempClassesList = new ArrayList<>();
+
+		//copying examples from classes list to temporary simplified list
+		for (Iterator<List<String[]>> iteratorClasses = classes.iterator(); iteratorClasses.hasNext();)
+		{
+			List<String[]> examplesList = iteratorClasses.next();
+			
+			for (Iterator<String[]> iteratorExamples = examplesList.iterator(); iteratorExamples.hasNext();)
+			{
+				String[] example = iteratorExamples.next();
+				String[] exampleToAdd = new String[example.length - 1];
+				
+				for(int i = 0; i < example.length - 1; i++)
+					exampleToAdd[i] = example[i];
+				
+				simplifiedClassesList.add(exampleToAdd);
+				tempClassesList.add(example);
+			}
+		}
+		
+		double[] attributeMeans = new double[simplifiedClassesList.get(0).length];
+
+		for(int i = 0; i < attributeMeans.length; i++)
+			attributeMeans[i] = 0;
+		
+		double[] attributeStds = new double[simplifiedClassesList.get(0).length];
+
+		for(int i = 0; i < attributeStds.length; i++)
+			attributeStds[i] = 0;
+		
+		//calculate mean
+		for (Iterator<String[]> iterator = simplifiedClassesList.iterator(); iterator.hasNext();)
+		{
+			String[] example = iterator.next();
+			
+			for(int i = 0; i < example.length; i++)
+			{
+				double attrValue = Double.parseDouble(example[i]);
+				
+				attributeMeans[i] += attrValue; 
+			}
+		}
+		
+		for(int i = 0; i < attributeMeans.length; i++)
+			attributeMeans[i] /= simplifiedClassesList.size();
+
+		//calculate std
+		for (Iterator<String[]> iterator = simplifiedClassesList.iterator(); iterator.hasNext();)
+		{
+			String[] example = iterator.next();
+			
+			for(int i = 0; i < example.length; i++)
+			{
+				double attrValue = Double.parseDouble(example[i]);
+				
+				attributeStds[i] += Math.pow(attrValue - attributeMeans[i], 2); 
+			}
+		}
+		
+		for(int i = 0; i < attributeStds.length; i++)
+			attributeStds[i] = Math.sqrt(attributeStds[i] /(simplifiedClassesList.size() - 1));
+		
+		//calculate standarized value
+		for (Iterator<String[]> iterator = simplifiedClassesList.iterator(); iterator.hasNext();)
+		{
+			String[] example = iterator.next();
+
+			for(int i = 0; i < example.length; i++)
+			{
+				double attrValue = Double.parseDouble(example[i]);
+				
+				example[i] = String.valueOf((attrValue - attributeMeans[i]) / attributeStds[i]);
+			}
+		}
+		
+		for (int i = 0; i < tempClassesList.size(); i++)
+		{
+			String[] example = new String[tempClassesList.get(0).length];
+			
+			for(int j = 0; j < example.length - 1; j++)
+				example[j] = simplifiedClassesList.get(i)[j];
+			
+			example[example.length - 1] = tempClassesList.get(i)[tempClassesList.get(i).length - 1];
+			
+			simplifiedClassesList.set(i, example);
+		}
+		
+    	if (!classes.isEmpty())
+    		classes.clear();
+    	
+    	for (int i = 0; i < classesQuantity; i++)
+    		classes.add(new ArrayList<String[]>());
+    	
+		for (Iterator<String[]> iterator = simplifiedClassesList.iterator(); iterator.hasNext();)
+    	{
+    		String[] example = iterator.next();
+
+    		for (int i = 0; i < classesQuantity; i++)
+    		{
+    			if (classValues[i].equals(example[attributesQuantity]))
+    			{
+    				classes.get(i).add(example);
+    				break;
+    			}
+    		}
+    	}
+	}
 
 }

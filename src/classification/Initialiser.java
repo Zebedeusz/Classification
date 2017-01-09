@@ -4,12 +4,37 @@ public class Initialiser {
 
     public static void main(String[] args)
     {
-    	
+    	/*
     	Director director = Director.getInstance();
     	director.beginWork();
+    	*/
+    	Director director = Director.getInstance();
     	
+    	director.dataAcq.initialise("glass.data.txt");
+    	director.dataAcq.getDataFromFile();
+    	director.dataAcq.standarizeData();
+    	director.dataAcq.divideData(2);
+    	director.classifyKNN(5, DistanceCalculationMethod.Euclides, VotingApproach.democracy);
+    	director.classifyKNN(3, DistanceCalculationMethod.Euclides, VotingApproach.democracy);
+    	director.classifyKNN(7, DistanceCalculationMethod.Euclides, VotingApproach.democracy);
+    	director.classifyKNN(3, DistanceCalculationMethod.Euclides, VotingApproach.theCloserTheBetter);
+    	director.classifyKNN(5, DistanceCalculationMethod.Euclides, VotingApproach.theCloserTheBetter);
+    	director.classifyKNN(7, DistanceCalculationMethod.Euclides, VotingApproach.theCloserTheBetter);
+    	
+    	director.classifyKNN(5, DistanceCalculationMethod.Manhattan, VotingApproach.democracy);
+    	director.classifyKNN(3, DistanceCalculationMethod.Manhattan, VotingApproach.democracy);
+    	director.classifyKNN(7, DistanceCalculationMethod.Manhattan, VotingApproach.democracy);
+    	director.classifyKNN(3, DistanceCalculationMethod.Manhattan, VotingApproach.theCloserTheBetter);
+    	director.classifyKNN(5, DistanceCalculationMethod.Manhattan, VotingApproach.theCloserTheBetter);
+    	director.classifyKNN(7, DistanceCalculationMethod.Manhattan, VotingApproach.theCloserTheBetter);
+    	
+    	director.classifyKNN(5, DistanceCalculationMethod.Czebyszew, VotingApproach.democracy);
+    	director.classifyKNN(3, DistanceCalculationMethod.Czebyszew, VotingApproach.democracy);
+    	director.classifyKNN(7, DistanceCalculationMethod.Czebyszew, VotingApproach.democracy);
+    	director.classifyKNN(3, DistanceCalculationMethod.Czebyszew, VotingApproach.theCloserTheBetter);
+    	director.classifyKNN(5, DistanceCalculationMethod.Czebyszew, VotingApproach.theCloserTheBetter);
+    	director.classifyKNN(7, DistanceCalculationMethod.Czebyszew, VotingApproach.theCloserTheBetter);
     	/*
-    	
     	UserInteractor userInteractor =  UserInteractor.getInstance();
     	int userPick;
     	userPick = userInteractor.displayMenu(1);
