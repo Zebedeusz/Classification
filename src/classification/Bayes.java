@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Bayes extends Classifier 
 {
-	private boolean normalize;
+	private boolean normalize = false;
 	private double[][] means;
 	private double[][] variations;
 	
@@ -106,7 +106,7 @@ public class Bayes extends Classifier
 		return p+1;
 	}
 	
-	private String classifyExample(String[] example)
+	public String classifyExample(String[] example)
 	{
 		double[] P = new double[trainingData.size()]; 
 		double pAttr;

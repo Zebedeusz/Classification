@@ -1,13 +1,8 @@
 package classification;
 
-import java.sql.Savepoint;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-
 
 import javafx.util.Pair;
 
@@ -45,7 +40,7 @@ public class K_NearestNeighbours extends Classifier
 		{
 			case Euclides:
 				
-				for(int i = 0; i < exampleTested.length; i++)
+				for(int i = 0; i < exampleTested.length - 1; i++)
 					distance += Math.pow(Double.parseDouble(exampleTested[i]) - Double.parseDouble(exampleTrained[i]), 2);
 				
 				distance = Math.sqrt(distance);
@@ -54,14 +49,14 @@ public class K_NearestNeighbours extends Classifier
 				
 			case Manhattan:
 				
-				for(int i = 0; i < exampleTested.length; i++)
+				for(int i = 0; i < exampleTested.length - 1; i++)
 					distance += Math.abs(Double.parseDouble(exampleTested[i]) - Double.parseDouble(exampleTrained[i]));
 				
 				break;
 				
 			case Czebyszew:
 				
-				for(int i = 0; i < exampleTested.length; i++)
+				for(int i = 0; i < exampleTested.length - 1; i++)
 					 distance = Math.max(Math.abs(Double.parseDouble(exampleTested[i]) - Double.parseDouble(exampleTrained[i])), distance);
 
 				break;
@@ -161,44 +156,70 @@ public class K_NearestNeighbours extends Classifier
 			case doubleWeighted:
 				
 				//sorting examplesWithDistance with ascending order
-				Collections.sort(examplesWithDistance, new Comparator<Pair<String[], Double>>() 
+				//Collections.sort(examplesWithDistance, (e1, e2) -> (int) (e1.getValue() - e2.getValue()));
+				//examplesWithDistance.sort((e1, e2) -> (int) (e1.getValue() - e2.getValue()));
+				List<Pair<String[], Double>>  tempExamplesWithDistance = new ArrayList<>();
+				while(!examplesWithDistance.isEmpty())
 				{
-				    @Override
-				    public int compare(final Pair<String[], Double> o1, final Pair<String[], Double> o2) 
-				    {
-				        return (int) (o1.getValue() - o2.getValue());
-				    }
-				});
+					double min = 500;
+					Pair<String[], Double> minPair = examplesWithDistance.get(0);
+					
+					for(Pair<String[], Double> e : examplesWithDistance)
+					{if(e.getValue() < min){ min = e.getValue(); minPair = e;}}
+					
+					tempExamplesWithDistance.add(minPair);
+					examplesWithDistance.remove(minPair);
+				}
+				examplesWithDistance = tempExamplesWithDistance;
 				
 				//calculating weights
 				List<Pair<String, Double>> doubleClassesWeights = new ArrayList<>();
 				double maxDist = examplesWithDistance.get(examplesWithDistance.size() - 1).getValue();
-				double minDist = examplesWithDistance.get(1).getValue();
+				double minDist = examplesWithDistance.get(0).getValue();
 				
-				//TODO
-				for(int i = 1; i <= examplesWithDistance.size(); i++)
+				for(int i = 0; i < examplesWithDistance.size(); i++)
 				{
 					double weight;
 					
-					if(i == examplesWithDistance.size())
+					if(i == examplesWithDistance.size() - 1)
 						weight = 0;
 					else
+						weight = ((maxDist - examplesWithDistance.get(i).getValue()) / (maxDist - minDist)) * (1/(i+1));
+					
+					String tempClass = examplesWithDistance.get(i).getKey()[examplesWithDistance.get(i).getKey().length - 1];
+					
+					boolean found = false;
+					for(Pair<String, Double> classWeight : doubleClassesWeights)
 					{
-						weight = ((maxDist - examplesWithDistance.get(i).getValue()) / (maxDist - minDist)) * (1/i);
+						if(classWeight.getKey().equals(tempClass))
+						{
+							found = true;
+							classWeight = new Pair(tempClass, classWeight.getValue() + weight);
+							break;
+						}
 					}
 					
-					doubleClassesWeights.add(new Pair(examplesWithDistance.get(i).getKey(), weight));
+					if(!found)
+						doubleClassesWeights.add(new Pair(tempClass, weight));
 				}
 				
+				//finding class with highest weight
+				mostFrequentClass = "";
+				double maxDoubleWeight = -1;
 				
+				for(Pair<String, Double> classWeight : doubleClassesWeights)
+				{
+					if(classWeight.getValue() > maxDoubleWeight)
+					{
+						mostFrequentClass = classWeight.getKey();
+						maxWeight = classWeight.getValue();
+					}
+				}
+				
+				classOfExample = mostFrequentClass;
 
-				
-				
-				
 				break;
 		}
-		
-		
 		
 		return classOfExample;
 	}

@@ -11,8 +11,8 @@ import java.util.List;
 
 public class DataAcquisitor 
 {
+	//private final String dataFileLocation = "C:/Users/Micha³/git/Jezyk/";
 	private final String dataFileLocation = "C:/Users/Micha³/Desktop/Semestr 2/Systemy ucz¹ce siê/Laboratorium/kNN/";
-
 	//info about data from user
 	private int attributesQuantity;
 
@@ -367,8 +367,6 @@ public class DataAcquisitor
 		
 		
     }
-    
-    
     
     public List<List<String[]>> getData()
     {

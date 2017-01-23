@@ -9,32 +9,65 @@ public class Initialiser {
     	director.beginWork();
     	*/
     	Director director = Director.getInstance();
-    	
+    	/*
     	director.dataAcq.initialise("glass.data.txt");
     	director.dataAcq.getDataFromFile();
     	director.dataAcq.standarizeData();
     	director.dataAcq.divideData(2);
-    	director.classifyKNN(5, DistanceCalculationMethod.Euclides, VotingApproach.democracy);
-    	director.classifyKNN(3, DistanceCalculationMethod.Euclides, VotingApproach.democracy);
-    	director.classifyKNN(7, DistanceCalculationMethod.Euclides, VotingApproach.democracy);
-    	director.classifyKNN(3, DistanceCalculationMethod.Euclides, VotingApproach.theCloserTheBetter);
-    	director.classifyKNN(5, DistanceCalculationMethod.Euclides, VotingApproach.theCloserTheBetter);
-    	director.classifyKNN(7, DistanceCalculationMethod.Euclides, VotingApproach.theCloserTheBetter);
+*/
     	
-    	director.classifyKNN(5, DistanceCalculationMethod.Manhattan, VotingApproach.democracy);
-    	director.classifyKNN(3, DistanceCalculationMethod.Manhattan, VotingApproach.democracy);
-    	director.classifyKNN(7, DistanceCalculationMethod.Manhattan, VotingApproach.democracy);
-    	director.classifyKNN(3, DistanceCalculationMethod.Manhattan, VotingApproach.theCloserTheBetter);
-    	director.classifyKNN(5, DistanceCalculationMethod.Manhattan, VotingApproach.theCloserTheBetter);
-    	director.classifyKNN(7, DistanceCalculationMethod.Manhattan, VotingApproach.theCloserTheBetter);
+    	//String[] dataSets = {"seeds.data.txt", "glass.data.txt", "wine.data.txt", "winequality-red.txt", "winequality-white.txt"};
+    	String[] dataSets = {"seeds.data.txt"};
+    	int[] crossValidArray = {2};
     	
-    	director.classifyKNN(5, DistanceCalculationMethod.Czebyszew, VotingApproach.democracy);
-    	director.classifyKNN(3, DistanceCalculationMethod.Czebyszew, VotingApproach.democracy);
-    	director.classifyKNN(7, DistanceCalculationMethod.Czebyszew, VotingApproach.democracy);
-    	director.classifyKNN(3, DistanceCalculationMethod.Czebyszew, VotingApproach.theCloserTheBetter);
-    	director.classifyKNN(5, DistanceCalculationMethod.Czebyszew, VotingApproach.theCloserTheBetter);
-    	director.classifyKNN(7, DistanceCalculationMethod.Czebyszew, VotingApproach.theCloserTheBetter);
+    	for(String dataSet : dataSets)
+    	{
+        	director.dataAcq.initialise(dataSet);
+        	director.dataAcq.getDataFromFile();
+        	for(int i = 0; i < director.dataAcq.getAttributesQuantity(); i++)
+        		director.dataAcq.discretizeAttributeByFrequency(i, 5);
+        	
+        	for(int div : crossValidArray)
+        	{
+        		director.dataAcq.divideData(div);
+        		
+		    	director.classifyBagging(5, 0.8);
+        	}
+    	}
+    	
     	/*
+    	String[] dataSets = {"seeds.data.txt", "glass.data.txt", "wine.data.txt", "winequality-red.txt", "winequality-white.txt"};
+    	int[] crossValidArray = {2};
+    	int[] kArray = {3,5,7};
+    	DistanceCalculationMethod[] dstCalcMeth = {DistanceCalculationMethod.Euclides, DistanceCalculationMethod.Manhattan, DistanceCalculationMethod.Czebyszew};
+    	VotingApproach[] votAppr = {VotingApproach.democracy, VotingApproach.theCloserTheBetter, VotingApproach.doubleWeighted};
+    	
+    	for(String dataSet : dataSets)
+    	{
+        	director.dataAcq.initialise(dataSet);
+        	director.dataAcq.getDataFromFile();
+        	director.dataAcq.standarizeData();
+        	
+        	for(int div : crossValidArray)
+        	{
+        		director.dataAcq.divideData(div);
+        		
+        		for(int k : kArray)
+        			for(DistanceCalculationMethod dcm : dstCalcMeth)
+        				for(VotingApproach vA : votAppr)
+        			    	director.classifyKNN(k, dcm, vA);
+        	}
+    	}
+    	
+    	*/
+    	/*
+    	director.dataAcq.initialise("data2_pred,prep,ppron,conj.txt");
+    	director.dataAcq.getDataFromFile();
+    	for(int i = 0; i < director.dataAcq.getAttributesQuantity(); i++)
+    		director.dataAcq.discretizeAttributeByFrequency(i, 5);
+    	director.dataAcq.divideData(3);
+    	director.classifyBayes();
+    	
     	UserInteractor userInteractor =  UserInteractor.getInstance();
     	int userPick;
     	userPick = userInteractor.displayMenu(1);
