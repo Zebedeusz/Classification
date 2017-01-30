@@ -38,7 +38,7 @@ public class F_Measure
 		try {
 			BufferedWriter dataFileWriter = new BufferedWriter(new FileWriter(path, true));
 			
-			dataFileWriter.write(" ;");
+			/*dataFileWriter.write(" ;");
 			
 			for(int j = 0; j < classesQuantity; j++)
 				dataFileWriter.write(classValues[j] + ";");
@@ -50,17 +50,17 @@ public class F_Measure
 				for(int l = 0; l < meanScores.length; l++)
 					dataFileWriter.write(String.valueOf(meanScores[k][l]).replaceAll("\\.", "\\,") + ";");
 			}
-			
-			dataFileWriter.write("\n");
+			*/
+			dataFileWriter.write("\n" + caseName);
 			for(int j = 0; j < meanPrecision.length; j++)
 			{
 				dataFileWriter.write("\nClass " + classValues[j] + "\n");
-				dataFileWriter.write("Mean Precision;" + String.valueOf(meanPrecision[j]).replaceAll("\\.", "\\,") + "\n");
-				dataFileWriter.write("Mean Recall;" + String.valueOf(meanRecall[j]).replaceAll("\\.", "\\,") + "\n");
-				dataFileWriter.write("Mean f-measure;" + String.valueOf(meanF_Measure[j]).replaceAll("\\.", "\\,") + "\n");
+				//dataFileWriter.write("Mean Precision;" + String.valueOf(meanPrecision[j]).replaceAll("\\.", "\\,") + "\n");
+				//dataFileWriter.write("Mean Recall;" + String.valueOf(meanRecall[j]).replaceAll("\\.", "\\,") + "\n");
+				dataFileWriter.write("Mean f-measure;" + String.valueOf(meanF_Measure[j]).replaceAll("\\.", "\\,"));
 			}
 
-			dataFileWriter.write("\nMean Accuracy " + caseName + ";" + String.valueOf(meanAccuracy).replaceAll("\\.", "\\,") + "\n\n");
+			dataFileWriter.write("\nMean Accuracy " + ";" + String.valueOf(meanAccuracy).replaceAll("\\.", "\\,") + "\n");
 			
 			dataFileWriter.close();
 			

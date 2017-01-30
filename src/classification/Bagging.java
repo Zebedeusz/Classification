@@ -73,7 +73,7 @@ public class Bagging extends Classifier
 				tempExample[i] = example[i];
 			
 			tempExample[tempExample.length-1] = maxClass;
-			this.classifiedData.add(example);
+			this.classifiedData.add(tempExample);
 		}
 		
 		

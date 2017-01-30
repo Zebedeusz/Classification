@@ -12,7 +12,7 @@ import java.util.List;
 public class DataAcquisitor 
 {
 	//private final String dataFileLocation = "C:/Users/Micha³/git/Jezyk/";
-	private final String dataFileLocation = "C:/Users/Micha³/Desktop/Semestr 2/Systemy ucz¹ce siê/Laboratorium/kNN/";
+	private final String dataFileLocation = "C:/Users/Micha³/Desktop/Semestr 2/Systemy ucz¹ce siê/Laboratorium/6/";
 	//info about data from user
 	private int attributesQuantity;
 
