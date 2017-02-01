@@ -3,6 +3,7 @@ package classification;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,7 +14,7 @@ public abstract class Classifier
 	
 	public void setTrainingData(List<List<String[]>> trainingData)
 	{
-		this.trainingData = trainingData;
+		this.trainingData = new ArrayList<>(trainingData);
 	}
 
 	public List<String[]> getClassifiedData()

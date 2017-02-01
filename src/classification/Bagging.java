@@ -41,7 +41,10 @@ public class Bagging extends Classifier
 		this.classifiedData = new ArrayList<String[]>();
 		
 		for(Bayes bayes : setOfBayesClassifiers)
+		{
 			bayes.setTrainingData(getSubsampleOfTrainingData());
+			bayes.buildClassifier();
+		}
 		
 		for(String[] example : testData)
 		{

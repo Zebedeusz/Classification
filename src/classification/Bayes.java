@@ -1,14 +1,19 @@
 package classification;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class Bayes extends Classifier 
 {
 	private boolean normalize = false;
 	private double[][] means;
 	private double[][] variations;
+	private List<Double> classProbabilities;
+	private HashMap<Integer, HashMap<String, HashMap<Integer, Double>>> attributeProbabilities;
 	
 	public boolean isNormalize() {
 		return normalize;
@@ -118,17 +123,12 @@ public class Bayes extends Classifier
 			P[i] = 1; pAttr = 1;
 			
 			for(int j = 0; j < example.length-1; j++)
-			{
-				if(!normalize)
-					pAttr *= attributeProbability(j, example[j], i);
-				if(normalize)
-					pAttr *= attributeProbabilityNormalized(j, Double.parseDouble(example[j]), i);
-				
-				//System.out.println("pAttr: " + pAttr);
-			}
+				if(!attributeProbabilities.containsKey(j) || !attributeProbabilities.get(j).containsKey(example[j]) || !attributeProbabilities.get(j).get(example[j]).containsKey(i))
+					pAttr *= 1;
+				else
+					pAttr *= (attributeProbabilities.get(j).get(example[j]).get(i) + 1);
 			
-			P[i] = classProbability(i)*pAttr;
-			//System.out.println("P["+i+"]: " + P[i]);
+			P[i] = classProbabilities.get(i)*pAttr;
 		}
 		
 		maxP = P[0];
@@ -142,7 +142,6 @@ public class Bayes extends Classifier
 			}
 		}
 		
-		//System.out.println(trainingData.get(maxPClass).size());
 		return trainingData.get(maxPClass).get(0)[trainingData.get(maxPClass).get(0).length-1];
 	}
 	
@@ -161,6 +160,59 @@ public class Bayes extends Classifier
 			example[example.length-1] = classifyExample(tempExample);
 			this.classifiedData.add(example);
 		}
-
+	}
+	
+	public void buildClassifier()
+	{
+		//attribute names examination
+		attributeProbabilities = new HashMap<>();
+		
+		for(int i = 0; i < trainingData.get(0).get(0).length - 1; i++)
+			attributeProbabilities.put(i, new HashMap<>());
+		
+		for(List<String[]> classesList : trainingData)
+		{
+			for(String[] example : classesList)
+			{
+				int attrCnt = 0;
+				for(int i = 0; i < example.length - 1; i++)
+				{
+					boolean found = false;
+				
+					for (String attrName : attributeProbabilities.get(attrCnt).keySet())	
+						if(example[i].equals(attrName))
+						{ found = true; break; }
+					
+					if(!found)
+					{
+						HashMap<String, HashMap<Integer, Double>> tempMap = new HashMap<>();
+						tempMap.put(example[i], new HashMap<>());
+						attributeProbabilities.get(i).put(example[i], new HashMap<>());
+					}
+					attrCnt++;
+				}
+			}
+		}
+		
+		//building the classifier
+		classProbabilities = new ArrayList<>();
+		for(int i = 0; i < trainingData.size(); i++)
+			this.classProbabilities.add(i, classProbability(i));
+		
+		
+		
+		for(int attrCnt = 0; attrCnt < attributeProbabilities.size(); attrCnt++)
+		{
+			for (String attrName : attributeProbabilities.get(attrCnt).keySet())	
+			{
+				HashMap<Integer, Double> tempAttrProbForClassMap = new HashMap<>();
+				
+				for(int j = 0; j < trainingData.size(); j++)
+					tempAttrProbForClassMap.put(j, attributeProbability(attrCnt, attrName, j));
+				
+				attributeProbabilities.get(attrCnt).put(attrName, new HashMap<>(tempAttrProbForClassMap));
+				
+			}
+		}
 	}
 }

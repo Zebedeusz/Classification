@@ -1,6 +1,7 @@
 package classification;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,8 +23,6 @@ public class F_Measure
 	private double[] meanPrecision;
 	private double[] meanF_Measure;
 	
-	
-	//TODO
 	public String caseName;
 	
 	private F_Measure(){};
@@ -36,8 +35,18 @@ public class F_Measure
 	public void writeMeansOfMeasuresToFile(String path, int classesQuantity, String[] classValues)
 	{
 		try {
-			BufferedWriter dataFileWriter = new BufferedWriter(new FileWriter(path, true));
 			
+			if(!new File(path).exists())
+			{
+				BufferedWriter tempDataFileWriter = new BufferedWriter(new FileWriter(path, true));
+				tempDataFileWriter.write(";");
+				for(String classValue : classValues)
+					tempDataFileWriter.write(classValue + ";");
+				tempDataFileWriter.close();
+			}
+			
+			BufferedWriter dataFileWriter = new BufferedWriter(new FileWriter(path, true));
+
 			/*dataFileWriter.write(" ;");
 			
 			for(int j = 0; j < classesQuantity; j++)
@@ -51,16 +60,16 @@ public class F_Measure
 					dataFileWriter.write(String.valueOf(meanScores[k][l]).replaceAll("\\.", "\\,") + ";");
 			}
 			*/
-			dataFileWriter.write("\n" + caseName);
+			dataFileWriter.write("\n" + caseName + ";");
 			for(int j = 0; j < meanPrecision.length; j++)
 			{
-				dataFileWriter.write("\nClass " + classValues[j] + "\n");
+				//dataFileWriter.write("\nClass " + classValues[j] + "\n");
 				//dataFileWriter.write("Mean Precision;" + String.valueOf(meanPrecision[j]).replaceAll("\\.", "\\,") + "\n");
 				//dataFileWriter.write("Mean Recall;" + String.valueOf(meanRecall[j]).replaceAll("\\.", "\\,") + "\n");
-				dataFileWriter.write("Mean f-measure;" + String.valueOf(meanF_Measure[j]).replaceAll("\\.", "\\,"));
+				dataFileWriter.write(String.valueOf(meanF_Measure[j]).replaceAll("\\.", "\\,")+ ";");
 			}
 
-			dataFileWriter.write("\nMean Accuracy " + ";" + String.valueOf(meanAccuracy).replaceAll("\\.", "\\,") + "\n");
+			//dataFileWriter.write("\nMean Accuracy " + ";" + String.valueOf(meanAccuracy).replaceAll("\\.", "\\,") + "\n");
 			
 			dataFileWriter.close();
 			

@@ -12,6 +12,7 @@ public class Boosting extends Classifier
 	private Bayes[] setOfBayesClassifiers;
 	private double[] wages;
 	private List<String[]> flattenedTrainingData;
+	private List<String[]> flattenedSubsampleForBayes;
 	
 	Boosting(int qntOfBayesClassifiers, double portionOfTrainingDataInSubsample)
 	{
@@ -21,8 +22,6 @@ public class Boosting extends Classifier
 		
 		for(int i = 0; i < QNT_OF_BAYES_CLASSIFIERS; i++)
 			setOfBayesClassifiers[i] = new Bayes();
-		
-		this.flattenedTrainingData = new ArrayList<>();
 	}
 	
 	private List<List<String[]>> getSubsampleOfTrainingData(double[] probabilitiesRanges)
@@ -34,11 +33,11 @@ public class Boosting extends Classifier
 		
 		for(int j = 0; j < sizeOfSubSample; j++)
 		{
-			double randomRange = Math.random();
+			double randomRange = Math.random()*probabilitiesRanges[probabilitiesRanges.length - 1];
 			
 			for(int k = 0; k < probabilitiesRanges.length; k++)
 					if(probabilitiesRanges[k] > randomRange)
-						subsample.add(flattenedTrainingData.get(k));
+						{subsample.add(flattenedTrainingData.get(k)); break;}
 		}
 		
 		List<String> classValues = new ArrayList<>();
@@ -57,6 +56,8 @@ public class Boosting extends Classifier
 				subsampleForBayes.get(subsampleForBayes.size() - 1).add(example);
 			}
 		}
+		
+		this.flattenedSubsampleForBayes = new ArrayList<>(subsample);
 		return subsampleForBayes;
 	}
 	
@@ -77,9 +78,11 @@ public class Boosting extends Classifier
 		double[] gammas = new double[QNT_OF_BAYES_CLASSIFIERS];
 		
 		//training
-		int classifierIndex = 0;
-		for(Bayes bayes : setOfBayesClassifiers)
+		int qntOfUsedClassifiers = QNT_OF_BAYES_CLASSIFIERS;
+		for(int cfIndex = 0; cfIndex < qntOfUsedClassifiers; cfIndex++)
 		{
+			Bayes bayes = setOfBayesClassifiers[cfIndex];
+			
 			double[] probabilities = new double[wages.length];
 			double[] probabilitiesRanges = new double[wages.length];
 			String[] classesForTrainingExamples = new String[flattenedTrainingData.size()];
@@ -96,24 +99,36 @@ public class Boosting extends Classifier
 					probabilitiesRanges[i] = sum(i, probabilities);
 			
 			bayes.setTrainingData(getSubsampleOfTrainingData(probabilitiesRanges));
+			bayes.buildClassifier();
 			
-			errors[classifierIndex] = 0;
-			for(int i = 0; i < flattenedTrainingData.size(); i++)
+			errors[cfIndex] = 0;
+			for(int i = 0; i < flattenedSubsampleForBayes.size(); i++)
 			{
-				classesForTrainingExamples[i] = bayes.classifyExample(flattenedTrainingData.get(i));
+				classesForTrainingExamples[i] = bayes.classifyExample(flattenedSubsampleForBayes.get(i));
 				
-				if(!flattenedTrainingData.get(i)[flattenedTrainingData.get(i).length - 1].equals(classesForTrainingExamples[i]))
-					errors[classifierIndex] += probabilities[i];
+				if(!flattenedSubsampleForBayes.get(i)[flattenedSubsampleForBayes.get(i).length - 1].equals(classesForTrainingExamples[i]))
+					errors[cfIndex] += probabilities[i];
 			}
-				
-			gammas[classifierIndex] = Math.log10((1-errors[classifierIndex])/errors[classifierIndex]);
+			
+			/*if(cfIndex > 0 && errors[cfIndex] > 0.5)
+			{
+				qntOfUsedClassifiers = cfIndex;
+				break;
+			}*/
+			
+			//if(errors[cfIndex] != 0)
+				//gammas[cfIndex] = Math.log10((1-errors[cfIndex])/errors[cfIndex]);
+			gammas[cfIndex] = -1*Math.tanh(4*errors[cfIndex]-2)+2;
+			double xx = Math.tanh(4*errors[cfIndex]-2)+1;
+			
+			//else
+				//gammas[cfIndex] = 15;
 			
 			//wages update
-			for(int i = 0; i < flattenedTrainingData.size(); i++)
-				if(!flattenedTrainingData.get(i)[flattenedTrainingData.get(i).length - 1].equals(classesForTrainingExamples[i]))
-					wages[i] = wages[i]*Math.exp(gammas[classifierIndex]);
-			
-			classifierIndex++;
+			for(int i = 0; i < flattenedSubsampleForBayes.size(); i++)
+				if(!flattenedSubsampleForBayes.get(i)[flattenedSubsampleForBayes.get(i).length - 1].equals(classesForTrainingExamples[i]))
+					//wages[flattenedTrainingData.indexOf(flattenedSubsampleForBayes.get(i))] = wages[flattenedTrainingData.indexOf(flattenedSubsampleForBayes.get(i))]*Math.exp(gammas[cfIndex]);
+					wages[flattenedTrainingData.indexOf(flattenedSubsampleForBayes.get(i))] = wages[flattenedTrainingData.indexOf(flattenedSubsampleForBayes.get(i))]*(xx);
 		}
 		
 		//classification
@@ -121,29 +136,33 @@ public class Boosting extends Classifier
 		{
 			HashMap<String, Double> wagesOfClassifiedClasses = new HashMap<>();;
 
-			classifierIndex = 0;
-			for(Bayes bayes : setOfBayesClassifiers)
+			for(int cfIndex = 0; cfIndex < qntOfUsedClassifiers; cfIndex++)
 			{
+				Bayes bayes = setOfBayesClassifiers[cfIndex];
+				
 				String classForExample = bayes.classifyExample(flattenedTrainingData.get(i));
 				
 				if(wagesOfClassifiedClasses.containsKey(classForExample))
-					wagesOfClassifiedClasses.put(classForExample, wagesOfClassifiedClasses.get(classForExample) + gammas[classifierIndex]);
+					wagesOfClassifiedClasses.replace(classForExample, wagesOfClassifiedClasses.get(classForExample) + gammas[cfIndex]);
 				else
-					wagesOfClassifiedClasses.put(classForExample, gammas[classifierIndex]);
-				
-				classifierIndex++;
+					wagesOfClassifiedClasses.put(classForExample, gammas[cfIndex]);
 			}
 			
 			double max = 0;
 			String maxClass = "";
 			for (Map.Entry<String, Double> entry : wagesOfClassifiedClasses.entrySet())			
 			{
+				//System.out.println(entry.getValue() + "_" + entry.getKey());
+				
 				if(entry.getValue() > max)
 				{
 					max = entry.getValue();
 					maxClass = entry.getKey();
 				}
 			}
+			
+			//System.out.println(maxClass);
+			//System.out.println();
 			
 			String[] tempExample = new String[flattenedTrainingData.get(i).length+1];
 			for(int j = 0; j < flattenedTrainingData.get(i).length; j++)
@@ -152,14 +171,9 @@ public class Boosting extends Classifier
 			tempExample[tempExample.length-1] = maxClass;
 			this.classifiedData.add(tempExample);
 		}
-		
-
-
-		
-		
 	}
 	
-	private double sum(int elementIndex, double[] probabilities )
+	private double sum(int elementIndex, double[] probabilities)
 	{
 		double probabilityRange = 0;
 		

@@ -215,7 +215,7 @@ public class Director
 	public void classifyBayes()
 	{
 		int dividedDataSize = dataAcq.getDividedData().size();
-		String filePath = dataAcq.getDataFileLocation() + "wyniki.csv";
+		String filePath = dataAcq.getDataFileLocation() +  dataAcq.getDataFileName().split("\\.")[0] +"_wyniki.csv";
 		int[][][] scores = new int[dividedDataSize][dataAcq.getClassesQuantity()][dataAcq.getClassesQuantity()];
 		double[][] recalls = new double[dividedDataSize][dataAcq.getClassesQuantity()];
 		double[][] precisions = new double[dividedDataSize][dataAcq.getClassesQuantity()];
@@ -238,11 +238,9 @@ public class Director
 			if(i != 0)
 				dataAcq.appendTrainingData(0, i);
 			
-			bayes.setNormalize(false);
-			
-			//bayes.setNormalize(true);
-			
 			bayes.setTrainingData(dataAcq.getTrainingData());
+			
+			bayes.buildClassifier();
 			
 			bayes.classifyExamples(dataAcq.getTestData());
 			
@@ -255,7 +253,9 @@ public class Director
 			fMeasures[i] = fMeasure.getF_Measure();
 		}
 		
-		System.out.println("Classification performed successfuly.");
+		fMeasure.caseName =  dataAcq.getDataFileName().split("\\.")[0] + "_" + "bayes_" + dividedDataSize;
+
+		System.out.println("Bayes finished:" + fMeasure.caseName );
 		fMeasure.calculateMeanAccuracy(accuracies);
 		fMeasure.calculateMeanPrecisions(precisions);
 		fMeasure.calculateMeanRecalls(recalls);
@@ -269,7 +269,7 @@ public class Director
 	public void classifyBagging(int qntOfBayesClassifiers, double portionOfTrainingDataInSubsample)
 	{
 		int dividedDataSize = dataAcq.getDividedData().size();
-		String filePath = dataAcq.getDataFileLocation() + "wyniki.csv";
+		String filePath = dataAcq.getDataFileLocation() +  dataAcq.getDataFileName().split("\\.")[0] +"_wyniki.csv";
 		int[][][] scores = new int[dividedDataSize][dataAcq.getClassesQuantity()][dataAcq.getClassesQuantity()];
 		double[][] recalls = new double[dividedDataSize][dataAcq.getClassesQuantity()];
 		double[][] precisions = new double[dividedDataSize][dataAcq.getClassesQuantity()];
@@ -303,15 +303,15 @@ public class Director
 			fMeasures[i] = fMeasure.getF_Measure();
 		}
 		
-		System.out.println("Classification performed successfuly.");
+		fMeasure.caseName =  dataAcq.getDataFileName().split("\\.")[0] + "_" + "bagging_" + dividedDataSize + "_" + qntOfBayesClassifiers + "_" + portionOfTrainingDataInSubsample;
+
+		System.out.println("Bagging finished:" + fMeasure.caseName );
 		fMeasure.calculateMeanAccuracy(accuracies);
 		fMeasure.calculateMeanPrecisions(precisions);
 		fMeasure.calculateMeanRecalls(recalls);
 		fMeasure.calculateMeanScores(scores);
 		fMeasure.calculateMeanF_Measures(fMeasures);
 
-		
-		fMeasure.caseName =  dataAcq.getDataFileName().split("\\.")[0] + "_" + dividedDataSize + "_" + qntOfBayesClassifiers + "_" + portionOfTrainingDataInSubsample;
 		fMeasure.writeMeansOfMeasuresToFile(filePath, dataAcq.getClassesQuantity(), dataAcq.getClassValues());
 		System.out.println("Confusion matrix with f-measures saved to a file.");
 	}
@@ -319,7 +319,7 @@ public class Director
 	public void classifyBoosting(int qntOfBayesClassifiers, double portionOfTrainingDataInSubsample)
 	{
 		int dividedDataSize = dataAcq.getDividedData().size();
-		String filePath = dataAcq.getDataFileLocation() + "wyniki.csv";
+		String filePath = dataAcq.getDataFileLocation() +  dataAcq.getDataFileName().split("\\.")[0] +"_wyniki.csv";
 		int[][][] scores = new int[dividedDataSize][dataAcq.getClassesQuantity()][dataAcq.getClassesQuantity()];
 		double[][] recalls = new double[dividedDataSize][dataAcq.getClassesQuantity()];
 		double[][] precisions = new double[dividedDataSize][dataAcq.getClassesQuantity()];
@@ -353,15 +353,15 @@ public class Director
 			fMeasures[i] = fMeasure.getF_Measure();
 		}
 		
-		System.out.println("Classification performed successfuly.");
+		fMeasure.caseName =  dataAcq.getDataFileName().split("\\.")[0] + "_" + "boosting_" + dividedDataSize + "_" + qntOfBayesClassifiers + "_" + portionOfTrainingDataInSubsample;
+
+		System.out.println("Boosting finished:" + fMeasure.caseName );
 		fMeasure.calculateMeanAccuracy(accuracies);
 		fMeasure.calculateMeanPrecisions(precisions);
 		fMeasure.calculateMeanRecalls(recalls);
 		fMeasure.calculateMeanScores(scores);
 		fMeasure.calculateMeanF_Measures(fMeasures);
-
 		
-		fMeasure.caseName =  dataAcq.getDataFileName().split("\\.")[0] + "_" + dividedDataSize + "_" + qntOfBayesClassifiers + "_" + portionOfTrainingDataInSubsample;
 		fMeasure.writeMeansOfMeasuresToFile(filePath, dataAcq.getClassesQuantity(), dataAcq.getClassValues());
 		System.out.println("Confusion matrix with f-measures saved to a file.");
 	}
