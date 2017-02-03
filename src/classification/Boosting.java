@@ -118,8 +118,8 @@ public class Boosting extends Classifier
 			
 			//if(errors[cfIndex] != 0)
 				//gammas[cfIndex] = Math.log10((1-errors[cfIndex])/errors[cfIndex]);
-			gammas[cfIndex] = -1*Math.tanh(4*errors[cfIndex]-2)+2;
-			double xx = Math.tanh(4*errors[cfIndex]-2)+1;
+			gammas[cfIndex] = -2*Math.tanh(4*errors[cfIndex]-2)+3;
+			double xx = 2*Math.tanh(4*errors[cfIndex]-2)+3;
 			
 			//else
 				//gammas[cfIndex] = 15;
@@ -129,6 +129,8 @@ public class Boosting extends Classifier
 				if(!flattenedSubsampleForBayes.get(i)[flattenedSubsampleForBayes.get(i).length - 1].equals(classesForTrainingExamples[i]))
 					//wages[flattenedTrainingData.indexOf(flattenedSubsampleForBayes.get(i))] = wages[flattenedTrainingData.indexOf(flattenedSubsampleForBayes.get(i))]*Math.exp(gammas[cfIndex]);
 					wages[flattenedTrainingData.indexOf(flattenedSubsampleForBayes.get(i))] = wages[flattenedTrainingData.indexOf(flattenedSubsampleForBayes.get(i))]*(xx);
+				else if(wages[flattenedTrainingData.indexOf(flattenedSubsampleForBayes.get(i))] > (double) (1/((double)flattenedTrainingData.size())))
+					wages[flattenedTrainingData.indexOf(flattenedSubsampleForBayes.get(i))] = wages[flattenedTrainingData.indexOf(flattenedSubsampleForBayes.get(i))]/(xx);
 		}
 		
 		//classification

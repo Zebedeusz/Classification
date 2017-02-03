@@ -15,8 +15,8 @@ public class Initialiser {
     	director.dataAcq.standarizeData();
     	director.dataAcq.divideData(2);
 */	
-    	String[] dataSets = {"seeds.data.txt", "glass.data.txt", "winequality-red.txt"};
-    	//String[] dataSets = {"wine.data.txt"};
+    	String[] dataSets = {"seeds.data.txt", "winequality-red.txt"};
+    	//String[] dataSets = {"glass.data.txt"};
     	int[] crossValidArray = {2,3,5,10};
     	int[] qntOfClassifiers = {5,10,20,50};
     	double[] portionOfTrData = {0.6,0.8,1.0};
@@ -31,13 +31,13 @@ public class Initialiser {
         	for(int div : crossValidArray)
         	{
         		director.dataAcq.divideData(div);
-        		director.classifyBayes();
+        		//director.classifyBayes();
         		
         		for(int qnt : qntOfClassifiers)
         		{
         			for(double portion : portionOfTrData)
         			{
-                		director.classifyBagging(qnt, portion);
+                		//director.classifyBagging(qnt, portion);
         		    	director.classifyBoosting(qnt, portion);
         			}
         		}
